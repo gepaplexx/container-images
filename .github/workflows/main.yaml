@@ -25,15 +25,13 @@ jobs:
     steps:
       - uses: actions/checkout@v2
         name: checkout
-      - name: debug
-        run: pwd && ls -lah
       - uses: mr-smithers-excellent/docker-build-push@v5
         name: push-container-image
         with:
           image: git-workflows
           registry: ghcr.io
           username: ${{ github.repository }}
-          password: ${{ secrets.PAT }}
+          password: ${{ secrets.GHCR_TOKEN }}
           dockerfile: git-workflows/Containerfile
           directory:  git-workflows
           addLatest: true
@@ -45,15 +43,13 @@ jobs:
     steps:
       - uses: actions/checkout@v2
         name: checkout
-      - name: debug
-        run: pwd && ls -lah
       - uses: mr-smithers-excellent/docker-build-push@v5
         name: push-container-image
         with:
           image: maven
           registry: ghcr.io
           username: ${{ github.repository }}
-          password: ${{ secrets.PAT }}
+          password: ${{ secrets.GHCR_TOKEN }}
           dockerfile: maven/Containerfile
           directory: maven
           addLatest: true
