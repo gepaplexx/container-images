@@ -28,10 +28,10 @@ jobs:
         with:
           image: git-workflows
           registry: ghcr.io
-          username: fhochleitner
+          username: ${{ github.repository }}
           password: ${{ secrets.PAT }}
-          dockerfile: git-workflows/Containerfile
-          directory: git-workflows
+          dockerfile: ${{ github.repository }}/git-workflows/Containerfile
+          directory: ${{ github.repository }}/git-workflows
           addLatest: true
           tags: ${{ steps.checkout.outputs.new-tag }}
   build-maven:
@@ -44,10 +44,10 @@ jobs:
         with:
           image: maven
           registry: ghcr.io
-          username: ${{ secrets.GHCR_USERNAME }}
-          password: ${{ secrets.GHCR_TOKEN }}
-          dockerfile: maven/Containerfile
-          directory: maven
+          username: ${{ github.repository }}
+          password: ${{ secrets.PAT }}
+          dockerfile: ${{ github.repository }}/maven/Containerfile
+          directory: ${{ github.repository }}/maven
           addLatest: true
           tags: ${{ steps.checkout.outputs.new-tag }}
   notify:
