@@ -23,6 +23,8 @@ jobs:
     needs:
       - create-tag
     steps:
+      - name: debug
+        run: pwd && ls -lah
       - uses: mr-smithers-excellent/docker-build-push@v5
         name: push-container-image
         with:
@@ -30,8 +32,8 @@ jobs:
           registry: ghcr.io
           username: ${{ github.repository }}
           password: ${{ secrets.PAT }}
-          dockerfile: ${{ github.repository }}/git-workflows/Containerfile
-          directory: ${{ github.repository }}/git-workflows
+          dockerfile: git-workflows/Containerfile
+          directory:  git-workflows
           addLatest: true
           tags: ${{ steps.checkout.outputs.new-tag }}
   build-maven:
@@ -46,8 +48,8 @@ jobs:
           registry: ghcr.io
           username: ${{ github.repository }}
           password: ${{ secrets.PAT }}
-          dockerfile: ${{ github.repository }}/maven/Containerfile
-          directory: ${{ github.repository }}/maven
+          dockerfile: maven/Containerfile
+          directory: maven
           addLatest: true
           tags: ${{ steps.checkout.outputs.new-tag }}
   notify:
