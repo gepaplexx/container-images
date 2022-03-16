@@ -1,4 +1,10 @@
 FROM maven:3.8.4-jdk-11
 
+RUN mkdir -p /maven/.m2/repository/
+
+COPY files/default-settings.xml /usr/share/maven/conf/settings.xml
+
 RUN chgrp -R 0 /root && \
-        chmod -R g=u /root
+        chmod -R g=u /root && \
+    chgrp -R 0 /maven && \
+        chmod -R g=u /maven
