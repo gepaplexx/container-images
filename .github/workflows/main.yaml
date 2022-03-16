@@ -23,6 +23,8 @@ jobs:
     needs:
       - create-tag
     steps:
+      - uses: actions/checkout@v2
+        name: checkout
       - name: debug
         run: pwd && ls -lah
       - uses: mr-smithers-excellent/docker-build-push@v5
@@ -41,6 +43,10 @@ jobs:
     needs:
       - create-tag
     steps:
+      - uses: actions/checkout@v2
+        name: checkout
+      - name: debug
+        run: pwd && ls -lah
       - uses: mr-smithers-excellent/docker-build-push@v5
         name: push-container-image
         with:
