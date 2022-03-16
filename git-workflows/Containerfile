@@ -1,0 +1,17 @@
+FROM alpine/git
+
+WORKDIR /root
+
+COPY bin/git-workflow.sh /usr/bin/
+
+RUN chmod +x /usr/bin/git-workflow.sh \
+    && apk add bash \
+    && mkdir -m 700 /root/.ssh
+
+
+RUN chgrp -R 0 /root && \
+        chmod -R g=u /root
+
+ENTRYPOINT ["/usr/bin/git-workflow.sh"]
+
+CMD ["help"]
