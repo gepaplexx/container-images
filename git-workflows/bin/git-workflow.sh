@@ -52,13 +52,13 @@ git_clone() {
 git_checkout() {
   cd "${WORKSPACE}/${REPO_NAME}" \
   && git checkout ${BRANCH} \
-  && cd cd || exit 1
+  && cd || exit 1
 }
 
 extract_git_commit() {
   cd "${WORKSPACE}/${REPO_NAME}" \
   && COMMIT_HASH=$(git rev-parse --short HEAD --git-dir "${WORKSPACE}/${REPO_NAME}") \
-  cd || exit 1
+  cd  cd || exit 1
   echo "${COMMIT_HASH}" > "${WORKSPACE}/commit_hash"
 }
 
