@@ -10,7 +10,7 @@ main(){
     SETTINGS_STRING="-s ${SETTINGS_LOCATION}"
   fi
   echo "mvn $* $SETTINGS_STRING"
-  mvn "$*" "${SETTINGS_STRING}"
+  bash -c "mvn $* ${SETTINGS_STRING}"
 }
 
 main "$*"
