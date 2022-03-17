@@ -1,6 +1,6 @@
 #!/bin/sh
 
-SETTINGS_LOCATION=/maven/settings.xml
+SETTINGS_LOCATION=/maven/maven-settings.xml
 SETTINGS_STRING=""
 
 ######################   handle options ###################
@@ -39,7 +39,7 @@ main(){
     SETTINGS_STRING="-s ${SETTINGS_LOCATION}"
   fi
 
-  mvn "${SETTINGS_STRING}" "$@"
+  mvn  "$@" "${SETTINGS_STRING}"
 }
 
 main "$@"
