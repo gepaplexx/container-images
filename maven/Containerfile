@@ -1,10 +1,12 @@
 FROM maven:3.8.4-jdk-11
 
-RUN mkdir -p /maven/.m2/repository/
-
 COPY files/default-settings.xml /usr/share/maven/conf/settings.xml
+COPY bin/mvn-wrapper.sh /usr/bin/mvn-wrapper.sh
 
-RUN chgrp -R 0 /root && \
+RUN chmod +x /usr/bin/mvn-wrapper.sh && \
+    chgrp  0 /usr/bin/mvn-wrapper.sh && \
+        chmod g=u /usr/bin/mvn-wrapper.sh \
+    chgrp -R 0 /root && \
         chmod -R g=u /root && \
     chgrp -R 0 /maven && \
         chmod -R g=u /maven
