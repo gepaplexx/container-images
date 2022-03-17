@@ -9,8 +9,7 @@ main(){
   if [ -f "${SETTINGS_LOCATION}" ]; then
     SETTINGS_STRING="-s ${SETTINGS_LOCATION}"
   fi
-
-  mvn  "$@" "${SETTINGS_STRING}"
+  mvn "$*" "${SETTINGS_STRING}"
 }
 
-main "$@"
+main "$*"
