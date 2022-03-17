@@ -7,6 +7,4 @@ RUN chmod +x /usr/bin/mvn-wrapper.sh && \
     chgrp  0 /usr/bin/mvn-wrapper.sh && \
         chmod g=u /usr/bin/mvn-wrapper.sh && \
     chgrp -R 0 /root && \
-        chmod -R g=u /root && \
-    chgrp -R 0 /maven && \
-        chmod -R g=u /maven
+        chmod -R g=u /root
