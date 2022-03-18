@@ -70,7 +70,7 @@ update_vars() {
 
 update_version() {
   cd "${WORKSPACE}/${REPO_NAME}" \
-  && sed -i "s/tag: \w\{7\}/tag:${COMMIT_HASH}/g" values.yaml \
+  && sed -i "s/tag: \w\{7\}/tag: ${COMMIT_HASH}/g" values.yaml \
   && git config --global user.name "argo-ci" \
   && git config --global user.email "argo-ci@gepardec.com" \
   && git add . \
