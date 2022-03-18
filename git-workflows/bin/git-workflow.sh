@@ -9,6 +9,7 @@ HOME=/root
 ######################### variables   #################
 DO_CLONE=false
 DO_CHECKOUT=false
+UPDATE_ARGO=false
 BRANCH="main"
 CLONE_URL=""
 REPO_NAME="sources"
@@ -51,7 +52,7 @@ git_clone() {
 
 git_checkout() {
   cd "${WORKSPACE}/${REPO_NAME}" \
-  && git checkout ${BRANCH} \
+  && git checkout ${BRANCH} || git checkout -b ${BRANCH} \
   && cd || exit 1
 }
 
@@ -62,12 +63,27 @@ extract_git_commit() {
   echo "${COMMIT_HASH}" > "${WORKSPACE}/commit_hash"
 }
 
+update_vars() {
+  CLONE_URL=${CLONE_URL%.git}-ci.git
+  REPO_NAME=${REPO_NAME}-ci
+}
+
+update_version() {
+  cd "${WORKSPACE}/${REPO_NAME}" \
+  && sed -i "s/tag: \w\{7\}/tag:${COMMIT_HASH}/g" values.yaml \
+  && git config --global user.name "argo-ci" \
+  && git config --global user.email "argo-ci@gepardec.com" \
+  && git add . \
+  && git commit -m "updated image version to tag ${COMMIT_HASH}" || true \
+  && git push
+}
+
 
 ######################   handle options ###################
 
 handle_options() {
 #  OPTS=$(getopt -o hcb:u:w: -l help,checkout,branch:,url:,workspace:)
-local opts=$(getopt -o cu:b:p:n:e -l clone,url:,branch:,path:,name:,extract -- "$@")
+local opts=$(getopt -o cu:b:p:n:eat: -l argo-update,clone,url:,branch:,path:,name:,extract,tag: -- "$@")
 local opts_return=$?
 
 if [[ ${opts_return} != 0 ]]; then
@@ -105,6 +121,14 @@ while true ; do
       EXTRACT_TAG=true
       shift 1
       ;;
+    --argo-update | -a)
+      UPDATE_ARGO=true
+      shift 1
+      ;;
+    --tag | -t)
+      COMMIT_HASH="${2}"
+      shift 2
+      ;;
     *)
       break
       ;;
@@ -127,6 +151,12 @@ main() {
   fi
   if [ "${EXTRACT_TAG}" == true ]; then
     extract_git_commit
+  fi
+  if [ "${UPDATE_ARGO}" == true ]; then
+    update_vars
+    git_clone
+    git_checkout
+    update_version
   fi
 }
 
