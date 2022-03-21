@@ -64,7 +64,7 @@ jobs:
       - uses: mr-smithers-excellent/docker-build-push@v5
         name: push-container-image
         with:
-          image: slack-notifications
+          image: slack-notify
           registry: ghcr.io
           username: ${{ github.repository }}
           password: ${{ secrets.GHCR_TOKEN }}
