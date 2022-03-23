@@ -78,7 +78,7 @@ jobs:
       - uses: actions/checkout@v2
         name: checkout
       - uses: mr-smithers-excellent/docker-build-push@v5
-        name: build-openshift-4.10
+        name: build-openshift-latest
         with:
           image: kubectl-oc-4.10
           registry: ghcr.io
