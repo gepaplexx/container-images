@@ -1,6 +1,9 @@
 name: Build kubectl-oc image
 
 on:
+  push:
+    branches: 
+      - "main"
   workflow_dispatch:
 
 jobs:
