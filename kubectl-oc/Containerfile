@@ -1,0 +1,15 @@
+FROM quay.io/bitnami/kubectl as kubectl
+
+FROM quay.io/openshift/origin-cli:latest as oc
+
+FROM alpine
+
+RUN apk --no-cache add vim bash
+
+COPY --from=kubectl /opt/bitnami/kubectl/bin/kubectl /usr/bin/
+COPY --from=oc /usr/bin/oc /usr/bin/
+
+ENTRYPOINT ["bash"]
+CMD ["sleep", "infinity"]
+
+
