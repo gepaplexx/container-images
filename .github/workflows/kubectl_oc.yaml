@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  build-kubectl-oc:
+  build-kubectl-oc-4.6:
     runs-on: ubuntu-latest
     needs:
       - create-tag
@@ -26,6 +26,13 @@ jobs:
           addLatest: true
           buildArgs:
             - OC_VERSION: 4.6
+  build-kubectl-oc-4.7:
+    runs-on: ubuntu-latest
+    needs:
+      - create-tag
+    steps:
+      - uses: actions/checkout@v2
+        name: checkout
       - uses: mr-smithers-excellent/docker-build-push@v5
         name: build-openshift-4.7
         with:
@@ -38,6 +45,13 @@ jobs:
           addLatest: true
           buildArgs:
             - OC_VERSION: 4.7
+  build-kubectl-oc-4.8:
+    runs-on: ubuntu-latest
+    needs:
+      - create-tag
+    steps:
+      - uses: actions/checkout@v2
+        name: checkout
       - uses: mr-smithers-excellent/docker-build-push@v5
         name: build-openshift-4.8
         with:
@@ -50,6 +64,13 @@ jobs:
           addLatest: true
           buildArgs:
             - OC_VERSION: 4.8
+  build-kubectl-oc-4.9:
+    runs-on: ubuntu-latest
+    needs:
+      - create-tag
+    steps:
+      - uses: actions/checkout@v2
+        name: checkout
       - uses: mr-smithers-excellent/docker-build-push@v5
         name: build-openshift-4.9
         with:
@@ -62,6 +83,13 @@ jobs:
           addLatest: true
           buildArgs:
             - OC_VERSION: 4.9
+  build-kubectl-oc-4.10:
+    runs-on: ubuntu-latest
+    needs:
+      - create-tag
+    steps:
+      - uses: actions/checkout@v2
+        name: checkout
       - uses: mr-smithers-excellent/docker-build-push@v5
         name: build-openshift-4.10
         with:
@@ -74,6 +102,13 @@ jobs:
           addLatest: true
           buildArgs:
             - OC_VERSION: 4.10
+  build-kubectl-oc-latest:
+    runs-on: ubuntu-latest
+    needs:
+      - create-tag
+    steps:
+      - uses: actions/checkout@v2
+        name: checkout
       - uses: mr-smithers-excellent/docker-build-push@v5
         name: build-openshift-latest
         with:
@@ -92,12 +127,12 @@ jobs:
     runs-on: ubuntu-latest
     if: ${{ failure() }}
     needs:
-      - build-openshift-4.6
-      - build-openshift-4.7
-      - build-openshift-4.8
-      - build-openshift-4.9
-      - build-openshift-4.10
-      - build-openshift-latest
+      - build-kubectl-oc-4.6
+      - build-kubectl-oc-4.7
+      - build-kubectl-oc-4.8
+      - build-kubectl-oc-4.9
+      - build-kubectl-oc-4.10
+      - build-kubectl-oc-latest
     steps:
       - name: Notify Slack channel on failure
         uses: rtCamp/action-slack-notify@v2
