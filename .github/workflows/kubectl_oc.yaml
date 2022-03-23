@@ -25,7 +25,7 @@ jobs:
           directory: kubectl-oc
           addLatest: true
           buildArgs:
-            - OC_VERSION: 4.6
+            - OC_VERSION=4.6
   build-kubectl-oc-4.7:
     runs-on: ubuntu-latest
     needs:
@@ -44,7 +44,7 @@ jobs:
           directory: kubectl-oc
           addLatest: true
           buildArgs:
-            - OC_VERSION: 4.7
+            - OC_VERSION=4.7
   build-kubectl-oc-4.8:
     runs-on: ubuntu-latest
     needs:
@@ -63,7 +63,7 @@ jobs:
           directory: kubectl-oc
           addLatest: true
           buildArgs:
-            - OC_VERSION: 4.8
+            - OC_VERSION=4.8
   build-kubectl-oc-4.9:
     runs-on: ubuntu-latest
     needs:
@@ -82,7 +82,7 @@ jobs:
           directory: kubectl-oc
           addLatest: true
           buildArgs:
-            - OC_VERSION: 4.9
+            - OC_VERSION=4.9
   build-kubectl-oc-4.10:
     runs-on: ubuntu-latest
     needs:
@@ -101,7 +101,7 @@ jobs:
           directory: kubectl-oc
           addLatest: true
           buildArgs:
-            - OC_VERSION: 4.10
+            - OC_VERSION=4.10
   build-kubectl-oc-latest:
     runs-on: ubuntu-latest
     needs:
@@ -121,7 +121,7 @@ jobs:
           addLatest: true
           tags: v4.10
           buildArgs:
-            - OC_VERSION: 4.10
+            - OC_VERSION=4.10
   notify:
     name: Slack Notifications
     runs-on: ubuntu-latest
