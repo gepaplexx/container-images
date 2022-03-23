@@ -1,0 +1,103 @@
+name: Release Containerimage
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build-kubectl-oc:
+    runs-on: ubuntu-latest
+    needs:
+      - create-tag
+    steps:
+      - uses: actions/checkout@v2
+        name: checkout
+      - uses: mr-smithers-excellent/docker-build-push@v5
+        name: build-openshift-4.6
+        with:
+          image: kubectl-oc-4.6
+          registry: ghcr.io
+          username: ${{ github.repository }}
+          password: ${{ secrets.GHCR_TOKEN }}
+          dockerfile: kubectl-oc/Containerfile
+          directory: kubectl-oc
+          addLatest: true
+          buildArgs:
+            - OC_VERSION: 4.6
+      - uses: mr-smithers-excellent/docker-build-push@v5
+        name: build-openshift-4.7
+        with:
+          image: kubectl-oc-4.7
+          registry: ghcr.io
+          username: ${{ github.repository }}
+          password: ${{ secrets.GHCR_TOKEN }}
+          dockerfile: kubectl-oc/Containerfile
+          directory: kubectl-oc
+          addLatest: true
+          buildArgs:
+            - OC_VERSION: 4.7
+      - uses: mr-smithers-excellent/docker-build-push@v5
+        name: build-openshift-4.8
+        with:
+          image: kubectl-oc-4.8
+          registry: ghcr.io
+          username: ${{ github.repository }}
+          password: ${{ secrets.GHCR_TOKEN }}
+          dockerfile: kubectl-oc/Containerfile
+          directory: kubectl-oc
+          addLatest: true
+          buildArgs:
+            - OC_VERSION: 4.8
+      - uses: mr-smithers-excellent/docker-build-push@v5
+        name: build-openshift-4.9
+        with:
+          image: kubectl-oc-4.9
+          registry: ghcr.io
+          username: ${{ github.repository }}
+          password: ${{ secrets.GHCR_TOKEN }}
+          dockerfile: kubectl-oc/Containerfile
+          directory: kubectl-oc
+          addLatest: true
+          buildArgs:
+            - OC_VERSION: 4.9
+      - uses: mr-smithers-excellent/docker-build-push@v5
+        name: build-openshift-4.10
+        with:
+          image: kubectl-oc-4.10
+          registry: ghcr.io
+          username: ${{ github.repository }}
+          password: ${{ secrets.GHCR_TOKEN }}
+          dockerfile: kubectl-oc/Containerfile
+          directory: kubectl-oc
+          addLatest: true
+            buildArgs:
+              - OC_VERSION: 4.10
+      - uses: mr-smithers-excellent/docker-build-push@v5
+        name: build-openshift-latest
+        with:
+          image: kubectl-oc
+          registry: ghcr.io
+          username: ${{ github.repository }}
+          password: ${{ secrets.GHCR_TOKEN }}
+          dockerfile: kubectl-oc/Containerfile
+          directory: kubectl-oc
+          addLatest: true
+          tags: v4.10
+            buildArgs:
+              - OC_VERSION: 4.10
+  notify:
+    name: Slack Notifications
+    runs-on: ubuntu-latest
+    if: ${{ failure() }}
+    needs:
+      - build-git-workflows
+      - build-maven
+      - build-slack-notification
+    steps:
+      - name: Notify Slack channel on failure
+        uses: rtCamp/action-slack-notify@v2
+        env:
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+          SLACK_ICON: https://avatars.githubusercontent.com/u/74975412?s=200&v=4
+          SLACK_USERNAME: ${{ github.repository }}
+          SLACK_COLOR: '#ff0033'
+          SLACK_FOOTER: ''
