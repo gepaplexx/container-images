@@ -1,4 +1,4 @@
-name: Release Containerimage
+name: Build kubectl-oc image
 
 on:
   workflow_dispatch:
