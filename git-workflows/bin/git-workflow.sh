@@ -46,7 +46,7 @@ git_clone() {
       print_usage
       exit 1
   fi
-  git clone ${CLONE_URL} ${WORKSPACE}/${REPO_NAME}
+  git clone --depth 1 --recurse-submodules --shallow-submodules ${CLONE_URL} ${WORKSPACE}/${REPO_NAME}
 
 }
 
