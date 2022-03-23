@@ -69,8 +69,8 @@ jobs:
           dockerfile: kubectl-oc/Containerfile
           directory: kubectl-oc
           addLatest: true
-            buildArgs:
-              - OC_VERSION: 4.10
+          buildArgs:
+            - OC_VERSION: 4.10
       - uses: mr-smithers-excellent/docker-build-push@v5
         name: build-openshift-latest
         with:
@@ -82,16 +82,19 @@ jobs:
           directory: kubectl-oc
           addLatest: true
           tags: v4.10
-            buildArgs:
-              - OC_VERSION: 4.10
+          buildArgs:
+            - OC_VERSION: 4.10
   notify:
     name: Slack Notifications
     runs-on: ubuntu-latest
     if: ${{ failure() }}
     needs:
-      - build-git-workflows
-      - build-maven
-      - build-slack-notification
+      - build-openshift-4.6
+      - build-openshift-4.7
+      - build-openshift-4.8
+      - build-openshift-4.9
+      - build-openshift-4.10
+      - build-openshift-latest
     steps:
       - name: Notify Slack channel on failure
         uses: rtCamp/action-slack-notify@v2
