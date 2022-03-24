@@ -73,7 +73,7 @@ update_vars() {
 
 update_version() {
   cd "${WORKSPACE}/${REPO_NAME}" \
-  && sed -i "s/tag: \w\{7\}/tag: ${COMMIT_HASH}/g" values.yaml \
+  && yq e '.image.tag = env(COMMIT_HASH)' -i values.yaml \
   && git config --global user.name "argo-ci" \
   && git config --global user.email "argo-ci@gepardec.com" \
   && git add . \
@@ -82,8 +82,9 @@ update_version() {
 }
 
 update_namespace() {
+  NAME="${REPO_NAME}-${NAMESPACE}"
   cd "${WORKSPACE}/${REPO_NAME}" \
-  && sed -i "s/namespace:/c    namespace: ${NAMESPACE}/g" application.yml \
+  && cat application.yml | yq -e '.metadata.name = env(NAME)' |  yq -e '.spec.destination.namespace = env(NAMESPACE)' |  yq -e '.spec.source.targetRevision = env(BRANCH)' > application.yaml \
   && git config --global user.name "argo-ci" \
   && git config --global user.email "argo-ci@gepardec.com" \
   && git add . \

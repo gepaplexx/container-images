@@ -4,6 +4,8 @@ WORKDIR /root
 
 COPY bin/git-workflow.sh /usr/bin/
 
+RUN apk add --no-cache yq
+
 RUN chmod +x /usr/bin/git-workflow.sh \
     && apk add bash \
     && mkdir -m 700 /root/.ssh
