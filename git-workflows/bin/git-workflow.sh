@@ -49,7 +49,7 @@ git_clone() {
       print_usage
       exit 1
   fi
-  git clone --depth 1 --recurse-submodules --shallow-submodules $"{CLONE_URL}" $"{WORKSPACE}"/$"{REPO_NAME}"
+  git clone --depth 1 --recurse-submodules --shallow-submodules "${CLONE_URL}" "${WORKSPACE}"/"${REPO_NAME}"
 
 }
 
@@ -67,8 +67,8 @@ extract_git_commit() {
 }
 
 update_vars() {
-  CLONE_URL=${CLONE_URL%.git}-ci.git
-  REPO_NAME=${REPO_NAME}-ci
+  CLONE_URL="${CLONE_URL%.git}-ci.git"
+  REPO_NAME="${REPO_NAME}-ci"
 }
 
 update_version() {
@@ -98,7 +98,7 @@ delete_branch() {
     echo "Not allowed to delete main/master branch"
     exit 1
   fi
-  cp "${WORKSPACE}"/$"{REPO_NAME}"/application.yml $"{WORKSPACE}"/application.yml
+  cp "${WORKSPACE}"/"${REPO_NAME}"/application.yml "${WORKSPACE}"/application.yml
   cd "${WORKSPACE}/${REPO_NAME}" \
   && git checkout main \
   && git branch -d ${BRANCH} \
@@ -110,7 +110,6 @@ delete_branch() {
 ######################   handle options ###################
 
 handle_options() {
-#  OPTS=$(getopt -o hcb:u:w: -l help,checkout,branch:,url:,workspace:)
 local opts=$(getopt -o cu:b:p:n:t: -l argo-update,clone,url:,branch:,path:,name:,extract,tag:,argo-create,namespace: -- "$@")
 local opts_return=$?
 
@@ -184,15 +183,6 @@ main() {
   echo "$*"
   handle_options "$@"
 
-  if [ "${DO_CLONE}" == true ]; then
-    git_clone
-  fi
-  if [ "${DO_CHECKOUT}" == true ]; then
-    git_checkout
-  fi
-  if [ "${EXTRACT_TAG}" == true ]; then
-    extract_git_commit
-  fi
   if [ "${CREATE_ARGO}" == true ]; then
     update_vars
     git_clone
@@ -210,6 +200,15 @@ main() {
     git_clone
     git_checkout
     update_version
+  fi
+  if [ "${DO_CLONE}" == true ]; then
+    git_clone
+  fi
+  if [ "${DO_CHECKOUT}" == true ]; then
+    git_checkout
+  fi
+  if [ "${EXTRACT_TAG}" == true ]; then
+    extract_git_commit
   fi
 }
 
