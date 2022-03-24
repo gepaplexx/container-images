@@ -101,7 +101,8 @@ delete_branch() {
   cp "${WORKSPACE}"/"${REPO_NAME}"/application.yml "${WORKSPACE}"/application.yml
   cd "${WORKSPACE}/${REPO_NAME}" \
   && git checkout main \
-  && git branch -D-global user.name "argo-ci" \
+  && git branch -D ${BRANCH} \
+  && git config --global user.name "argo-ci" \
   && git config --global user.email "argo-ci@gepardec.com" \
   && git push origin :${BRANCH}
 }
