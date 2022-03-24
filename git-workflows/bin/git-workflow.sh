@@ -128,7 +128,7 @@ delete_branch() {
 ######################   handle options ###################
 
 handle_options() {
-local opts=$(getopt -o cu:b:p:n:t: -l argo-update,clone,url:,branch:,path:,name:,extract,tag:,argo-create,namespace: -- "$@")
+local opts=$(getopt -o cu:b:p:n:t: -l argo-update,clone,url:,branch:,path:,name:,extract,tag:,argo-create,namespace:,argo-delete -- "$@")
 local opts_return=$?
 
 if [[ ${opts_return} != 0 ]]; then
