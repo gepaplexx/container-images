@@ -54,12 +54,14 @@ git_clone() {
 }
 
 git_checkout() {
+  echo "--- GIT CHECKOUT ---"
   cd "${WORKSPACE}/${REPO_NAME}" \
   && git checkout ${BRANCH} || git checkout -b ${BRANCH} \
-  && cd  || exit 1
+  && cd || exit 1
 }
 
 extract_git_commit() {
+  echo "--- EXTRACT TAG ---"
   cd "${WORKSPACE}/${REPO_NAME}" \
   && COMMIT_HASH=$(git rev-parse --short HEAD) \
   && cd || exit 1
@@ -67,11 +69,13 @@ extract_git_commit() {
 }
 
 update_vars() {
+  echo "--- UPDATE VARS ---"
   CLONE_URL="${CLONE_URL%.git}-ci.git"
   REPO_NAME="${REPO_NAME}-ci"
 }
 
 update_version() {
+  echo "--- UPDATE VERSION ---"
   export COMMIT_HASH
   cd "${WORKSPACE}/${REPO_NAME}" \
   && yq -i '.image.tag = env(COMMIT_HASH)' values.yaml \
@@ -82,10 +86,11 @@ update_version() {
   && git push
 }
 yq_update_application() {
-  export NAME=${REPO_NAME}-${NAMESPACE}
+  echo "--- YQ UPDATE APPLICATION ---"
   export REPO_NAME
   export NAMESPACE
   export BRANCH
+  export NAME=${REPO_NAME}-${NAMESPACE}
 
   yq -i '
     .metadata.name = env(NAME) |
@@ -95,19 +100,22 @@ yq_update_application() {
 }
 
 update_namespace() {
+  echo "--- UPDATE NAMESPACE ---"
   NAME="${REPO_NAME}-${NAMESPACE}"
-  cd "${WORKSPACE}/${REPO_NAME}" \
-  && yq_update_application \
-  && git config --global user.name "argo-ci" \
-  && git config --global user.email "argo-ci@gepardec.com" \
-  && git add . \
-  && git commit -m "created branch ${BRANCH} and updated application.yml" || true \
-  && git push --set-upstream origin "${BRANCH}"
-
+  cd "${WORKSPACE}/${REPO_NAME}" || exit 1
+  yq_update_application
+#  && git config --global user.name "argo-ci" \
+#  && git config --global user.email "argo-ci@gepardec.com" \
+#  && git add . \
+#  && git commit -m "created branch ${BRANCH} and updated application.yml" || true \
+#  && git push --set-upstream origin "${BRANCH}"
+  echo "WORKSPACE: ${WORKSPACE}"
+  echo "REPONAME: ${REPO_NAME}"
   cp "${WORKSPACE}/${REPO_NAME}/application.yml" "${WORKSPACE}/application.yml"
 }
 
 delete_branch() {
+  echo "--- DELETE BRANCH ---"
   if [ "${BRANCH}" == "main" ] || [ "${BRANCH}" == "master" ]; then
     echo "Not allowed to delete main/master branch"
     exit 1
@@ -208,12 +216,14 @@ main() {
     git_clone
     git_checkout
     delete_branch
+    exit 0
   fi
   if [ "${UPDATE_ARGO}" == true ]; then
     update_vars
     git_clone
     git_checkout
     update_version
+    exit 0
   fi
   if [ "${DO_CLONE}" == true ]; then
     git_clone
@@ -225,6 +235,14 @@ main() {
     extract_git_commit
   fi
 }
+
+# exit when any command fails
+set -e
+
+# keep track of the last executed command
+trap 'last_command=$current_command; current_command=$BASH_COMMAND' DEBUG
+# echo an error message before exiting
+trap 'echo "${last_command}" command failed with exit code $?."' EXIT
 
 main "$@"
 
