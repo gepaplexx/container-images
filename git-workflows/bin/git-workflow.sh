@@ -16,8 +16,7 @@ BRANCH="main"
 NAMESPACE=""
 CLONE_URL=""
 REPO_NAME="sources"
-WORKSPACE=$(pwd)
-#WORKSPACE="/mnt/out"
+WORKSPACE="/mnt/out"
 COMMIT_HASH=""
 
 ######################### print usage #################
@@ -91,7 +90,7 @@ update_namespace() {
   && git commit -m "created branch ${BRANCH} and updated application.yml" || true \
   && git push --set-upstream origin "${BRANCH}"
 
-  cp application.yml ${WORKSPACE}/application.yml
+  cp "${WORKSPACE}/${REPO_NAME}application.yml" "${WORKSPACE}/application.yml"
 }
 
 delete_branch() {
