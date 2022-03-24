@@ -16,7 +16,8 @@ BRANCH="main"
 NAMESPACE=""
 CLONE_URL=""
 REPO_NAME="sources"
-WORKSPACE="/mnt/out"
+WORKSPACE=$(pwd)
+#WORKSPACE="/mnt/out"
 COMMIT_HASH=""
 
 ######################### print usage #################
@@ -56,7 +57,7 @@ git_clone() {
 git_checkout() {
   cd "${WORKSPACE}/${REPO_NAME}" \
   && git checkout ${BRANCH} || git checkout -b ${BRANCH} \
-  && cd || exit 1
+  && cd  || exit 1
 }
 
 extract_git_commit() {
@@ -83,12 +84,12 @@ update_version() {
 
 update_namespace() {
   cd "${WORKSPACE}/${REPO_NAME}" \
-  && sed -i "s/namespace:*/namespace: ${NAMESPACE}" application.yml \
+  && sed -i "s/namespace:*/namespace: ${NAMESPACE}/g" application.yml \
   && git config --global user.name "argo-ci" \
   && git config --global user.email "argo-ci@gepardec.com" \
   && git add . \
   && git commit -m "updated image version to tag ${COMMIT_HASH}" || true \
-  && git push
+  && git push -set-upstream origin "${BRANCH}"
 
   cp application.yml ${WORKSPACE}/application.yml
 }
