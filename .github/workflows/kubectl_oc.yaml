@@ -7,38 +7,6 @@ on:
   workflow_dispatch:
 
 jobs:
-  build-kubectl-oc-4-6:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-        name: checkout
-      - uses: mr-smithers-excellent/docker-build-push@v5
-        name: build-openshift-4.6
-        with:
-          image: kubectl-oc-4.6
-          registry: ghcr.io
-          username: ${{ github.repository }}
-          password: ${{ secrets.GHCR_TOKEN }}
-          dockerfile: kubectl-oc/Containerfile
-          directory: kubectl-oc
-          addLatest: true
-          buildArgs: OC_VERSION=4.6
-  build-kubectl-oc-4-7:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-        name: checkout
-      - uses: mr-smithers-excellent/docker-build-push@v5
-        name: build-openshift-4.7
-        with:
-          image: kubectl-oc-4.7
-          registry: ghcr.io
-          username: ${{ github.repository }}
-          password: ${{ secrets.GHCR_TOKEN }}
-          dockerfile: kubectl-oc/Containerfile
-          directory: kubectl-oc
-          addLatest: true
-          buildArgs: OC_VERSION=4.7
   build-kubectl-oc-4-8:
     runs-on: ubuntu-latest
       - create-tag
@@ -110,8 +78,6 @@ jobs:
     runs-on: ubuntu-latest
     if: ${{ failure() }}
     needs:
-      - build-kubectl-oc-4-6
-      - build-kubectl-oc-4-7
       - build-kubectl-oc-4-8
       - build-kubectl-oc-4-9
       - build-kubectl-oc-4-10
