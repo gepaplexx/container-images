@@ -89,7 +89,7 @@ update_namespace() {
   && git config --global user.email "argo-ci@gepardec.com" \
   && git add . \
   && git commit -m "updated image version to tag ${COMMIT_HASH}" || true \
-  && git push -set-upstream origin "${BRANCH}"
+  && git push --set-upstream origin "${BRANCH}"
 
   cp application.yml ${WORKSPACE}/application.yml
 }
@@ -102,8 +102,7 @@ delete_branch() {
   cp "${WORKSPACE}"/"${REPO_NAME}"/application.yml "${WORKSPACE}"/application.yml
   cd "${WORKSPACE}/${REPO_NAME}" \
   && git checkout main \
-  && git branch -d ${BRANCH} \
-  && git config --global user.name "argo-ci" \
+  && git branch -D-global user.name "argo-ci" \
   && git config --global user.email "argo-ci@gepardec.com" \
   && git push origin :${BRANCH}
 }
