@@ -72,19 +72,32 @@ update_vars() {
 }
 
 update_version() {
+  export COMMIT_HASH
   cd "${WORKSPACE}/${REPO_NAME}" \
-  && yq e '.image.tag = env(COMMIT_HASH)' -i values.yaml \
+  && yq -i '.image.tag = env(COMMIT_HASH)' values.yaml \
   && git config --global user.name "argo-ci" \
   && git config --global user.email "argo-ci@gepardec.com" \
   && git add . \
   && git commit -m "updated image version to tag ${COMMIT_HASH}" || true \
   && git push
 }
+yq_update_application() {
+  export NAME=${REPO_NAME}-${NAMESPACE}
+  export REPO_NAME
+  export NAMESPACE
+  export BRANCH
+
+  yq -i '
+    .metadata.name = env(NAME) |
+    .spec.destination.namespace = env(NAMESPACE) |
+    .spec.source.targetRevision = env(BRANCH)
+  ' application.yml
+}
 
 update_namespace() {
   NAME="${REPO_NAME}-${NAMESPACE}"
   cd "${WORKSPACE}/${REPO_NAME}" \
-  && cat application.yml | yq -e '.metadata.name = env(NAME)' |  yq -e '.spec.destination.namespace = env(NAMESPACE)' |  yq -e '.spec.source.targetRevision = env(BRANCH)' > application.yaml \
+  && yq_update_application \
   && git config --global user.name "argo-ci" \
   && git config --global user.email "argo-ci@gepardec.com" \
   && git add . \
