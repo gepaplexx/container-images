@@ -90,7 +90,7 @@ update_namespace() {
   && git commit -m "created branch ${BRANCH} and updated application.yml" || true \
   && git push --set-upstream origin "${BRANCH}"
 
-  cp "${WORKSPACE}/${REPO_NAME}application.yml" "${WORKSPACE}/application.yml"
+  cp "${WORKSPACE}/${REPO_NAME}/application.yml" "${WORKSPACE}/application.yml"
 }
 
 delete_branch() {
