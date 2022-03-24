@@ -84,11 +84,11 @@ update_version() {
 
 update_namespace() {
   cd "${WORKSPACE}/${REPO_NAME}" \
-  && sed -i "s/namespace:*/namespace: ${NAMESPACE}/g" application.yml \
+  && sed -i "s/namespace:/c    namespace: ${NAMESPACE}/g" application.yml \
   && git config --global user.name "argo-ci" \
   && git config --global user.email "argo-ci@gepardec.com" \
   && git add . \
-  && git commit -m "updated image version to tag ${COMMIT_HASH}" || true \
+  && git commit -m "created branch ${BRANCH} and updated application.yml" || true \
   && git push --set-upstream origin "${BRANCH}"
 
   cp application.yml ${WORKSPACE}/application.yml
