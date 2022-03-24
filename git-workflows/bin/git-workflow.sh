@@ -10,7 +10,10 @@ HOME=/root
 DO_CLONE=false
 DO_CHECKOUT=false
 UPDATE_ARGO=false
+DELETE_ARGO=false
+CREATE_ARGO=false
 BRANCH="main"
+NAMESPACE=""
 CLONE_URL=""
 REPO_NAME="sources"
 WORKSPACE="/mnt/out"
@@ -78,12 +81,35 @@ update_version() {
   && git push
 }
 
+update_namespace() {
+  cd "${WORKSPACE}/${REPO_NAME}" \
+  && sed -i "s/namespace:*/namespace: ${NAMESPACE}" application.yml \
+  && git config --global user.name "argo-ci" \
+  && git config --global user.email "argo-ci@gepardec.com" \
+  && git add . \
+  && git commit -m "updated image version to tag ${COMMIT_HASH}" || true \
+  && git push
+}
+
+delete_branch() {
+  if [ "${BRANCH}" == "main" || "${BRANCH}" == "master" ]; then
+    echo "Not allowed to delete main/master branch"
+    exit 1
+  fi
+
+  cd "${WORKSPACE}/${REPO_NAME}" \
+  && git checkout main \
+  && git branch -d ${BRANCH} \
+  && git config --global user.name "argo-ci" \
+  && git config --global user.email "argo-ci@gepardec.com" \
+  && git push origin :${BRANCH}
+}
 
 ######################   handle options ###################
 
 handle_options() {
 #  OPTS=$(getopt -o hcb:u:w: -l help,checkout,branch:,url:,workspace:)
-local opts=$(getopt -o cu:b:p:n:eat: -l argo-update,clone,url:,branch:,path:,name:,extract,tag: -- "$@")
+local opts=$(getopt -o cu:b:p:n:t: -l argo-update,clone,url:,branch:,path:,name:,extract,tag:,argo-create,namespace: -- "$@")
 local opts_return=$?
 
 if [[ ${opts_return} != 0 ]]; then
@@ -113,16 +139,28 @@ while true ; do
       REPO_NAME="${2}"
       shift 2
       ;;
+    --namespace)
+      NAMESPACE="${2}"
+      shift 2
+      ;;
     --path | -p)
       WORKSPACE="${2}"
       shift 2
       ;;
-    --extract | -e)
+    --extract)
       EXTRACT_TAG=true
       shift 1
       ;;
-    --argo-update | -a)
+    --argo-update)
       UPDATE_ARGO=true
+      shift 1
+      ;;
+    --argo-create)
+      CREATE_ARGO=true
+      shift 1
+      ;;
+    --argo-delete)
+      DELETE_ARGO=true
       shift 1
       ;;
     --tag | -t)
@@ -151,6 +189,18 @@ main() {
   fi
   if [ "${EXTRACT_TAG}" == true ]; then
     extract_git_commit
+  fi
+  if { "${CREATE_ARGO}" == true ]; then
+    update_vars
+    git_clone
+    git_checkout
+    update_namespace
+  fi
+  if { "${DELETE_ARGO}" == true ]; then
+    update_vars
+    git_clone
+    git_checkout
+    delete_branch
   fi
   if [ "${UPDATE_ARGO}" == true ]; then
     update_vars
