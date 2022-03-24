@@ -192,13 +192,13 @@ main() {
   if [ "${EXTRACT_TAG}" == true ]; then
     extract_git_commit
   fi
-  if { "${CREATE_ARGO}" == true ]; then
+  if [ "${CREATE_ARGO}" == true ]; then
     update_vars
     git_clone
     git_checkout
     update_namespace
   fi
-  if { "${DELETE_ARGO}" == true ]; then
+  if [ "${DELETE_ARGO}" == true ]; then
     update_vars
     git_clone
     git_checkout
