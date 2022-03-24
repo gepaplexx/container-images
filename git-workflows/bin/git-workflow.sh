@@ -89,6 +89,8 @@ update_namespace() {
   && git add . \
   && git commit -m "updated image version to tag ${COMMIT_HASH}" || true \
   && git push
+
+  cp application.yml ${WORKSPACE}/application.yml
 }
 
 delete_branch() {
@@ -96,7 +98,7 @@ delete_branch() {
     echo "Not allowed to delete main/master branch"
     exit 1
   fi
-
+  cp "${WORKSPACE}/${REPO_NAME}/application.yml ${WORKSPACE}/application.yml"
   cd "${WORKSPACE}/${REPO_NAME}" \
   && git checkout main \
   && git branch -d ${BRANCH} \
