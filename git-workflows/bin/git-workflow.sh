@@ -49,7 +49,7 @@ git_clone() {
       print_usage
       exit 1
   fi
-  git clone --depth 1 --recurse-submodules --shallow-submodules ${CLONE_URL} ${WORKSPACE}/${REPO_NAME}
+  git clone --depth 1 --recurse-submodules --shallow-submodules $"{CLONE_URL}" $"{WORKSPACE}"/$"{REPO_NAME}"
 
 }
 
@@ -94,11 +94,11 @@ update_namespace() {
 }
 
 delete_branch() {
-  if [ "${BRANCH}" == "main" || "${BRANCH}" == "master" ]; then
+  if [ "${BRANCH}" == "main" ] || [ "${BRANCH}" == "master" ]; then
     echo "Not allowed to delete main/master branch"
     exit 1
   fi
-  cp "${WORKSPACE}/${REPO_NAME}/application.yml ${WORKSPACE}/application.yml"
+  cp "${WORKSPACE}"/$"{REPO_NAME}"/application.yml $"{WORKSPACE}"/application.yml
   cd "${WORKSPACE}/${REPO_NAME}" \
   && git checkout main \
   && git branch -d ${BRANCH} \
@@ -181,6 +181,7 @@ done
 ######################   MAIN ####################
 
 main() {
+  echo "$*"
   handle_options "$@"
 
   if [ "${DO_CLONE}" == true ]; then
