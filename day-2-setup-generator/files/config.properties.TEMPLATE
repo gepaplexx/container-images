@@ -1,0 +1,45 @@
+ENV=
+
+################# IDENTITY PROVIDER ##################
+ENABLE_GOOGLE_IP=true
+GOOGLE_CLIENTSECRET=
+GOOGLE_CLIENTID=
+GOOGLE_RESTRICTED_DOMAIN=
+
+ENABLE_GIT_IP=true
+GIT_CLIENTSECRET=
+GIT_CLIENTID=
+GIT_RESTRICTED_ORGS=
+
+################## CLUSTER UPDATER ###################
+SLACK_CHANNEL_CU=
+CONSOLE_URL=
+
+####################### VELERO #######################
+ENABLE_VELERO=true
+# TODO mit Felix besprechen wie aktuelle umsetzung aussieht
+
+################## CLUSTER-CONFIG ####################
+ALERTMANAGER_CONFIG=
+SLACK_CHANNEL_AM=
+
+################# ROOK/CEPH INSTANCE #################
+ENABLE_ROOK_CEPH=true
+
+################## CLUSTER-LOGGING ###################
+ENABLE_CLUSTER_LOGGING=true
+
+############### CERTIFICATE - PATCHES ################
+APISERVER_CUSTOMURL=
+
+################### CLUSTER ISSUER ###################
+SOLVERS_DNS_ZONE=
+SOLVERS_ACCESSKEYID=
+SOLVERS_SECRETNAME=
+SOLVERS_SECRETACCESSKEY=
+CERTIFICATES_DEFAULTINGRESS=
+CERTIFICATES_CONSOLE=
+CERTIFICATES_API=
+
+################## CONSOLE PATCHES ###################
+ROUTE_HOSTNAME=
