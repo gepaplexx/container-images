@@ -1,0 +1,12 @@
+FROM  ghcr.io/fhochleitner/slack-notify
+
+COPY bin/entrypoint.sh /entrypoint.sh
+
+RUN apk --no-cache add bash jq  \
+        && chgrp -R 0 /root \
+        && chmod -R g=u /root \
+        && chgrp -R 0 /entrypoint.sh \
+        && chmod -R g=u /entrypoint.sh \
+        && chmod +x /entrypoint.sh
+
+CMD ["/entrypoint.sh"]

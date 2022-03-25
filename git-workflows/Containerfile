@@ -4,6 +4,9 @@ WORKDIR /root
 
 COPY bin/git-workflow.sh /usr/bin/
 
+RUN wget https://github.com/mikefarah/yq/releases/download/v4.23.1/yq_linux_amd64 -O /usr/bin/yq \
+    && chmod +x /usr/bin/yq
+
 RUN chmod +x /usr/bin/git-workflow.sh \
     && apk add bash \
     && mkdir -m 700 /root/.ssh

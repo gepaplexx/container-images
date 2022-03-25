@@ -1,0 +1,16 @@
+FROM ubuntu:bionic
+
+ARG OC_VERSION
+
+RUN apt update -y && apt install -y wget vim bash \
+    && wget https://mirror.openshift.com/pub/openshift-v4/x86_64/clients/ocp/stable-$OC_VERSION/openshift-client-linux.tar.gz \
+    && tar -xvf openshift-client-linux.tar.gz --directory=/usr/bin/ \
+    && rm openshift-client-linux.tar.gz \
+    && chmod -R g=u  /usr/bin/ \
+    && chmod -R +x  /usr/bin/ \
+    && chgrp -R 0 /usr/bin/
+
+ENTRYPOINT ["bash"]
+CMD ["sleep", "infinity"]
+
+
