@@ -52,13 +52,14 @@ git_clone() {
       exit 1
   fi
   git clone --depth 1 --recurse-submodules --shallow-submodules "${CLONE_URL}" "${WORKSPACE}"/"${REPO_NAME}"
-  git remote set-branches origin '*'
-  git fetch
+
 }
 
 git_checkout() {
   echo "--- GIT CHECKOUT ---"
   cd "${WORKSPACE}/${REPO_NAME}" || exit 1
+  git remote set-branches origin '*'
+  git fetch
   git checkout ${BRANCH} || git checkout -b ${BRANCH}
   cd || exit 1
 }
