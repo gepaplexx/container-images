@@ -18,6 +18,7 @@ CLONE_URL=""
 REPO_NAME="sources"
 WORKSPACE="/mnt/out"
 COMMIT_HASH=""
+CI_REPOSITORY_SUFFIX="ci"
 
 ######################### print usage #################
 
@@ -51,7 +52,8 @@ git_clone() {
       exit 1
   fi
   git clone --depth 1 --recurse-submodules --shallow-submodules "${CLONE_URL}" "${WORKSPACE}"/"${REPO_NAME}"
-
+  git remote set-branches origin '*'
+  git fetch
 }
 
 git_checkout() {
@@ -71,8 +73,8 @@ extract_git_commit() {
 
 update_vars() {
   echo "--- UPDATE VARS ---"
-  CLONE_URL="${CLONE_URL%.git}-ci.git"
-  REPO_NAME="${REPO_NAME}-ci"
+  CLONE_URL="${CLONE_URL%.git}-${CI_REPOSITORY_SUFFIX}.git"
+  REPO_NAME="${REPO_NAME}-${CI_REPOSITORY_SUFFIX}"
 }
 
 update_version() {
@@ -91,7 +93,7 @@ yq_update_application() {
   export REPO_NAME
   export NAMESPACE
   export BRANCH
-  export NAME=${REPO_NAME}-${NAMESPACE}
+  export NAME=${REPO_NAME%-${CI_REPOSITORY_SUFFIX}}-${NAMESPACE}
 
   yq -i '.metadata.name = env(NAME) | .spec.destination.namespace = env(NAMESPACE) | .spec.source.targetRevision = env(BRANCH)' application.yml
 }
