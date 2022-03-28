@@ -120,7 +120,6 @@ delete_branch() {
     exit 1
   fi
   cd "${WORKSPACE}/${REPO_NAME}"  || exit 1
-  yq_update_application
   cp "${WORKSPACE}"/"${REPO_NAME}"/application.yml "${WORKSPACE}"/application.yml
   git checkout main
   git branch -D ${BRANCH}
