@@ -95,7 +95,7 @@ yq_update_application() {
   export BRANCH
   export NAME=${REPO_NAME%-${CI_REPOSITORY_SUFFIX}}-${NAMESPACE}
 
-  yq -i '.metadata.name = env(NAME) | .spec.destination.namespace = env(NAMESPACE) | .spec.source.targetRevision = env(BRANCH)' application.yml
+  yq -i '.metadata.name = env(NAME) | .spec.destination.namespace = env(NAME) | .spec.source.targetRevision = env(BRANCH)' application.yml
 }
 
 update_namespace() {
