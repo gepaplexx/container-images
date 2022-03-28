@@ -19,6 +19,7 @@ REPO_NAME="sources"
 WORKSPACE="/mnt/out"
 COMMIT_HASH=""
 CI_REPOSITORY_SUFFIX="ci"
+IMAGE_TAG_VALUE=".image.tag"
 
 ######################### print usage #################
 
@@ -81,8 +82,9 @@ update_vars() {
 update_version() {
   echo "--- UPDATE VERSION ---"
   export COMMIT_HASH
+  export IMAGE_TAG_VALUE
   cd "${WORKSPACE}/${REPO_NAME}" || exit 1
-  yq -i '.image.tag = env(COMMIT_HASH)' values.yaml
+  yq -i "${IMAGE_TAG_VALUE} = env(COMMIT_HASH)" values.yaml
   git config --global user.name "argo-ci"
   git config --global user.email "argo-ci@gepardec.com"
   git add .
@@ -131,7 +133,7 @@ delete_branch() {
 ######################   handle options ###################
 
 handle_options() {
-local opts=$(getopt -o cu:b:p:n:t: -l argo-update,clone,url:,branch:,path:,name:,extract,tag:,argo-create,namespace:,argo-delete -- "$@")
+local opts=$(getopt -o cu:b:p:n:t: -l argo-update,clone,url:,branch:,path:,name:,extract,tag:,argo-create,namespace:,argo-delete,image-tag-value: -- "$@")
 local opts_return=$?
 
 if [[ ${opts_return} != 0 ]]; then
@@ -187,6 +189,10 @@ while true ; do
       ;;
     --tag | -t)
       COMMIT_HASH="${2}"
+      shift 2
+      ;;
+    --image-tag-value)
+      IMAGE_TAG_VALUE="${2}"
       shift 2
       ;;
     *)
