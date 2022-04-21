@@ -413,3 +413,73 @@ applications:
       automated:
         prune: true
         selfHeal: true
+
+##################### GEPAPLEXX-CICD-TOOLS ######################
+  gepaplexx-cicd-tools:
+    name: gepaplexx-cicd-tools
+    enabled: true
+    argoProject: gepaplexx
+    destination:
+      namespace: gepaplexx-cicd-tools
+      create: true
+    source:
+      repoURL: "https://gepaplexx.github.io/gp-helm-charts/"
+      chart: gp-cicd-tools
+      targetRevision: "*"
+      helm:
+        parameters:
+        - name: "argocd.route.hostname"
+          value: "${GEPAPLEXX_CICD_TOOLS_ARGOCD_ROUTE_HOSTNAME}"
+        - name: "argo_workflows.ingress.hostname"
+          value: "${GEPAPLEXX_CICD_TOOLS_WORKFLOWS_ROUTE_HOSTNAME}"
+        - name: "argo_rollouts.dashboard.ingress.hosts[0]"
+          value: "${GEPAPLEXX_CICD_TOOLS_ROLLOUTS_ROUTE_HOSTNAME}"
+        - name: "argo_rollouts.dashboard.ingress.tls[0].hosts[0]"
+          value: "${GEPAPLEXX_CICD_TOOLS_ROLLOUTS_ROUTE_HOSTNAME}"
+        - name: "argo_rollouts.dashboard.ingress.tls[0].secretName"
+          value: "${GEPAPLEXX_CICD_TOOLS_ROLLOUTS_ROUTE_HOSTNAME}"
+        # Access to gepaplexx/gepaplexx-cicd repository!
+        - name: "argocd.workflowrepository.username"
+          value: "${GITHUB_CICD_TOOLS_WORFKLOWREPOSITORY_USERNAME}"
+        - name: "argocd.workflowrepository.sshPrivateKey"
+          value: "${GITHUB_CICD_TOOLS_WORFKLOWREPOSITORY_SSHPRIVATEKEY}"
+        - name: "argocd.workflowrepository.enabled"
+          value: "${GITHUB_CICD_TOOLS_WORKFLOWREPOSITORY_ENABLED}"
+    syncPolicy:
+      automated:
+        prune: true
+        selfHeal: true
+
+##################### GEPAPLEXX-CICD-EVENTBUS ######################
+  gepaplexx-cicd-eventbus:
+    name: gepaplexx-cicd-eventbus
+    enabled: true
+    argoProject: gepaplexx
+    destination:
+      namespace: gepaplexx-cicd-eventbus
+      create: true
+    source:
+      repoURL: "https://gepaplexx.github.io/gp-helm-charts/"
+      chart: gepaplexx-cicd-eventbus
+      targetRevision: "*"
+    syncPolicy:
+      automated:
+        prune: true
+        selfHeal: true
+
+##################### GEPAPLEXX-CICD ######################
+  gepaplexx-cicd:
+    name: gepaplexx-cicd
+    enabled: true
+    argoProject: gepaplexx-cicd
+    destianation:
+      namespace: openshift-gitops
+      create: false
+    source:
+      repoURL: "git@github.com:gepaplexx/gepaplexx-cicd.git"
+      targetRevision: "main"
+      path: "clusters/${ENV}/applications"
+    syncPolicy:
+      automated:
+        prune: true
+        selfHeal: true

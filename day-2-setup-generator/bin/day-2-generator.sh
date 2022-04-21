@@ -29,7 +29,7 @@ function printHeader() {
     printf "${2}################################################################################\n"
     printf "# Name: Day-2-Operations Generator\n"
     printf "# Description: TODO\n"
-    printf "# Author: gattma\n"
+    printf "# Author: gattma,fhochleitner\n"
     printf "# Version: v1.0\n"
     printf "# Documentation: https://gepardec.atlassian.net/wiki/spaces/G/pages/2393276417/Day-2-Operations\n"
     printf "# Configuration: ${1}\n"
@@ -72,8 +72,8 @@ function encryptSealedSecretCertificateForAnsibleVault() {
     ansible-vault encrypt_string --vault-password-file vault.password --name 'sealedSecretCertificate' -- "$(cat generated/${ENV}.crt)" > generated/${ENV}-crt-vault.yaml
     [[ $? = 0 ]] && printSuccess || printFailureAndExit "Encrypting"
 
-    printf "\nCopy the following part (red) into inventory-spoke-gepaplexx-$ENV/group-vars/all/vault.yaml\n"
-    printf "${red}$(cat generated/play-crt-vault.yaml)${normal}"
+    printf "\nCopy the following part (red) into inventory-spoke-gepaplexx-${ENV}/group-vars/all/vault.yaml\n"
+    printf "${red}$(cat generated/${ENV}-crt-vault.yaml)${normal}"
     
     waitToContinue
 
@@ -82,8 +82,8 @@ function encryptSealedSecretCertificateForAnsibleVault() {
     ansible-vault encrypt_string --vault-password-file vault.password --name 'sealedSecretPrivateKey' -- "$(cat generated/${ENV}.key)" > generated/${ENV}-key-vault.yaml
     [[ $? = 0 ]] && printSuccess || printFailureAndExit "Encrypting"
 
-    printf "\nCopy the following part (red) into inventory-spoke-gepaplexx-$ENV/group-vars/all/vault.yaml\n"
-    printf "${red}$(cat generated/play-key-vault.yaml)${normal}"
+    printf "\nCopy the following part (red) into inventory-spoke-gepaplexx-${ENV}/group-vars/all/vault.yaml\n"
+    printf "${red}$(cat generated/${ENV}-key-vault.yaml)${normal}"
     waitToContinue
     rm vault.password
     
@@ -163,13 +163,13 @@ function configureIdentityProvGit() {
 
 function configureClusterUpdater() {
     printf "Generating values for cluster updater..."
-    export ENV=$ENV
+    export ENV=${ENV}
     export CONSOLE_URL=$CONSOLE_URL
     export SLACK_B64=$(echo $SLACK_CHANNEL_CU | base64 -w 0)
     [[ $? = 0 ]] && printSuccess || printFailureAndExit "Generating"
 
     printf "Replacing parameters in values-${ENV}.yaml..."
-    replace '$SLACK_B64:$CONSOLE_URL:$ENV'
+    replace '$SLACK_B64:$CONSOLE_URL:${ENV}'
 }
 
 function configureClusterConfig() {
@@ -177,10 +177,10 @@ function configureClusterConfig() {
 
     if [ -z $ALERTMANAGER_CONFIG ]
     then
-        export ENV=$ENV
+        export ENV=${ENV}
         export SLACK_CHANNEL_AM=$SLACK_CHANNEL_AM
         cat templates/default-alertmanager.yaml.TEMPLATE \
-            | envsubst '$ENV:$SLACK_CHANNEL_AM' > generated/alertmanager.yaml
+            | envsubst '${ENV}:$SLACK_CHANNEL_AM' > generated/alertmanager.yaml
         AM_YAML=generated/alertmanager.yaml
     else
         AM_YAML=$ALERTMANAGER_CONFIG
@@ -199,8 +199,7 @@ function configureClusterConfig() {
 
     printf "Cleanup..."
     rm generated/alertmanager-secret.yaml
-    rm generated/alertmanager.yaml
-    [[ $? = 0 ]] && printSuccess || printFailureAndExit "Cleanup"    
+    [[ $? = 0 ]] && printSuccess || printFailureAndExit "Cleanup"
 }
 
 function configureRookCeph() {
@@ -238,6 +237,35 @@ function configureConsolePatches() {
     printf "Replace hostname..."
     export ROUTE_HOSTNAME=$ROUTE_HOSTNAME
     replace '$ROUTE_HOSTNAME'
+}
+
+function configureGepaplexxCicdTools() {
+    printf "Configure Gepaplexx CICD tools hostnames..."
+    export GEPAPLEXX_CICD_TOOLS_ARGOCD_ROUTE_HOSTNAME=${GEPAPLEXX_CICD_TOOLS_ARGOCD_ROUTE_HOSTNAME}
+    export GEPAPLEXX_CICD_TOOLS_ROLLOUTS_ROUTE_HOSTNAME=${GEPAPLEXX_CICD_TOOLS_ROLLOUTS_ROUTE_HOSTNAME}
+    export GEPAPLEXX_CICD_TOOLS_WORKFLOWS_ROUTE_HOSTNAME=${GEPAPLEXX_CICD_TOOLS_WORKFLOWS_ROUTE_HOSTNAME}
+    replace '$GEPAPLEXX_CICD_TOOLS_ARGOCD_ROUTE_HOSTNAME:$GEPAPLEXX_CICD_TOOLS_ROLLOUTS_ROUTE_HOSTNAME:$GEPAPLEXX_CICD_TOOLS_WORKFLOWS_ROUTE_HOSTNAME'
+
+    printf "generating sealed secret values for gepaplexx-cicd-repository..."
+        export GITHUB_CICD_TOOLS_WORFKLOWREPOSITORY_SSHPRIVATEKEY=$(echo GITHUB_CICD_TOOLS_WORFKLOWREPOSITORY_SSHPRIVATEKEY | base64 -w 0)
+        export GITHUB_CICD_TOOLS_WORFKLOWREPOSITORY_USERNAME=$(echo $GITHUB_CICD_TOOLS_WORFKLOWREPOSITORY_USERNAME | base64 -w 0)
+
+        cat templates/secret-cicd-repository-git.yaml.TEMPLATE \
+            | envsubst '$GITHUB_CICD_TOOLS_WORFKLOWREPOSITORY_SSHPRIVATEKEY:$GITHUB_CICD_TOOLS_WORFKLOWREPOSITORY_USERNAME' \
+            | kubeseal --cert generated/${ENV}.crt -o yaml > generated/gepaplexxcicd-repository-secret.yaml
+
+        [[ $? = 0 ]] && printSuccess || printFailureAndExit "Generating"
+        printf "Replacing parameters in values-${ENV}.yaml..."
+
+        export GITHUB_CICD_TOOLS_WORFKLOWREPOSITORY_SSHPRIVATEKEY=$(cat generated/gepaplexxcicd-repository-secret.yaml | grep sshPrivateKey | cut -d ':' -f 2 | xargs)
+        export GITHUB_CICD_TOOLS_WORFKLOWREPOSITORY_USERNAME=$(cat generated/gepaplexxcicd-repository-secret.yaml | grep username | cut -d ':' -f 2 | xargs)
+        export GITHUB_CICD_TOOLS_WORKFLOWREPOSITORY_ENABLED=${GITHUB_CICD_TOOLS_WORKFLOWREPOSITORY_ENABLED}
+
+        replace '$GITHUB_CICD_TOOLS_WORFKLOWREPOSITORY_SSHPRIVATEKEY:$GITHUB_CICD_TOOLS_WORFKLOWREPOSITORY_USERNAME:$GITHUB_CICD_TOOLS_WORKFLOWREPOSITORY_ENABLED'
+
+        printf "Cleanup..."
+        rm generated/gepaplexxcicd-repository-secret.yaml
+        [[ $? = 0 ]] && printSuccess || printFailureAndExit "Cleanup"
 }
 
 function checkPrerequisites() {
@@ -305,6 +333,9 @@ function main() {
 
     printActionHeader "CONFIGURE CONSOLE PATCHES" $yellow
     configureConsolePatches
+
+    printActionHeader "CONFIGURE GEPAPLEXX CICD TOOLS" $yellow
+    configureGepaplexxCicdTools
 
     printActionHeader "SUMMARY" $green
     printf "Successfully generated values for environment '${ENV}': generated/values-${ENV}.yaml\n"
