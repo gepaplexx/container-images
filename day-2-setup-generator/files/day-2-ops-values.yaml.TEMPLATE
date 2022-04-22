@@ -450,10 +450,10 @@ applications:
         prune: true
         selfHeal: true
 
-##################### GEPAPLEXX-CICD-EVENTBUS ######################
+##################### GEPAPLEXX-CICD-ARGO-EVENTS ######################
   gepaplexx-cicd-argo-events:
     name: gp-cicd-argo-events
-    enabled: false
+    enabled: true
     argoProject: gepaplexx
     destination:
       namespace: gepaplexx-cicd-tools
@@ -491,7 +491,7 @@ applications:
     name: gepaplexx-cicd
     enabled: true
     argoProject: gepaplexx-cicd
-    destianation:
+    destination:
       namespace: openshift-gitops
       create: false
     source:
