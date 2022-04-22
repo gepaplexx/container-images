@@ -58,9 +58,15 @@ function printFailureAndExit() {
 ##### SURVEY ############
 function generateCertificate() {
     printActionHeader "GENERATE SEALED SECRETS CERTIFICATE" $yellow
-    openssl req -x509 -nodes -newkey rsa:4096 -keyout "generated/${ENV}.key" -out "generated/${ENV}.crt" -subj "/CN=sealed-secret/O=sealed-secret" >> /dev/null
-    printf "Generating certificate and private key..."
-    [[ $? = 0 ]] && printSuccess || printFailureAndExit "Generating"
+    if [[ -f "generated/${ENV}.key" ]] && [[ -f "generated/${ENV}.crt" ]]; then
+        printf "Existing Certififactes found for Cluster: ${ENV}...\n"
+        printf "Skipping generation and use existing files..."
+        printSuccess
+    else
+      printf "Generating certificate and private key..."
+      openssl req -x509 -nodes -newkey rsa:4096 -keyout "generated/${ENV}.key" -out "generated/${ENV}.crt" -subj "/CN=sealed-secret/O=sealed-secret" >> /dev/null
+      [[ $? = 0 ]] && printSuccess || printFailureAndExit "Generating"
+    fi
 }
 
 function encryptSealedSecretCertificateForAnsibleVault() {
