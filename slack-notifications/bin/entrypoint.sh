@@ -5,7 +5,7 @@ source /etc/slack-config
 export SLACK_ICON="https://github.com/fhochleitner/logos/raw/main/argo.png"
 export SLACK_USERNAME="argo-workflows"
 export SLACK_MARKDOWN=true
-export SLACK_COLOR="#228b22"
+export SLACK_COLOR="#ff0033"
 export SLACK_WEBHOOK
 
 #if [[ "$*" != "null" ]]; then
