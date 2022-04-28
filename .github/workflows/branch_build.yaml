@@ -1,4 +1,4 @@
-name: Release Containerimage
+name: Release Branch Images
 
 on:
   workflow_dispatch:
