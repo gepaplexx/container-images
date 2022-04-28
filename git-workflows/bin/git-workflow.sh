@@ -28,11 +28,19 @@ cat <<EOF 1>&2
 usage: $PRG [-hE]
 
 Options:
-    c | clone: Clone a git repository
-    u | url: clone url of the git repository
-    b | branch: switches to specific branch. Default: main
-    p | path: directory of workspace
-    n | name: name of the git repository
+    c | clone:                  Clone a git repository
+    u | url:                    Clone url of the git repository
+    b | branch:                 Switches to specific branch. Default: main
+    p | path:                   directory of workspace
+    n | name:                   name of the git repository
+    t | tag:                    allows override of image tag for argo update. Default: commit-hash
+    - | image-tag-value:        allows to override the path to the image tag in application.yml. Default: .image.tag
+    - | namespace:              namespace for argocd application update
+    - | extract:                saves the commit hash as output to be used as image tag
+    - | argo-update:            update existing argocd application
+    - | argo-create:            create a new argocd application in $namespace
+    - | argo-delete:            deletes the corresponding $branch in infrastructure repository
+
     h | help: This help
 
 Function:
