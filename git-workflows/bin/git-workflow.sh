@@ -35,7 +35,7 @@ Options:
     p | path:                   directory of workspace
     n | name:                   name of the git repository
     t | tag:                    allows override of image tag for argo update. Default: commit-hash
-    - | image-tag-value:        allows to override the path to the image tag in application.yaml. Default: .image.tag
+    - | image-tag-location:        allows to override the path to the image tag in application.yaml. Default: .image.tag
     - | namespace:              namespace for argocd application update
     - | extract:                saves the commit hash as output to be used as image tag
     - | argo-update:            update existing argocd application
@@ -146,7 +146,7 @@ delete_branch() {
 ######################   handle options ###################
 
 handle_options() {
-local opts=$(getopt -o cu:b:p:n:t: -l argo-update,clone,url:,branch:,path:,name:,extract,tag:,argo-create,namespace:,argo-delete,image-tag-value: -- "$@")
+local opts=$(getopt -o cu:b:p:n:t: -l argo-update,clone,url:,branch:,path:,name:,extract,tag:,argo-create,namespace:,argo-delete,image-tag-location: -- "$@")
 local opts_return=$?
 
 if [[ ${opts_return} != 0 ]]; then
@@ -204,7 +204,7 @@ while true ; do
       COMMIT_HASH="${2}"
       shift 2
       ;;
-    --image-tag-value)
+    --image-tag-location)
       IMAGE_TAG_LOCATION="${2}"
       DEFAULT_IMAGE_TAG_LOCATION=false
       shift 2
