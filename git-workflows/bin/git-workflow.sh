@@ -19,7 +19,8 @@ REPO_NAME="sources"
 WORKSPACE="/mnt/out"
 COMMIT_HASH=""
 CI_REPOSITORY_SUFFIX="ci"
-IMAGE_TAG_VALUE=".image.tag"
+IMAGE_TAG_LOCATION=""
+DEFAULT_IMAGE_TAG_LOCATION=true
 
 ######################### print usage #################
 
@@ -34,7 +35,7 @@ Options:
     p | path:                   directory of workspace
     n | name:                   name of the git repository
     t | tag:                    allows override of image tag for argo update. Default: commit-hash
-    - | image-tag-value:        allows to override the path to the image tag in application.yml. Default: .image.tag
+    - | image-tag-value:        allows to override the path to the image tag in application.yaml. Default: .image.tag
     - | namespace:              namespace for argocd application update
     - | extract:                saves the commit hash as output to be used as image tag
     - | argo-update:            update existing argocd application
@@ -85,14 +86,18 @@ update_vars() {
   echo "--- UPDATE VARS ---"
   CLONE_URL="${CLONE_URL%.git}-${CI_REPOSITORY_SUFFIX}.git"
   REPO_NAME="${REPO_NAME}-${CI_REPOSITORY_SUFFIX}"
+
+  if [[ ${DEFAULT_IMAGE_TAG_LOCATION} ]]; then
+    IMAGE_TAG_LOCATION="${REPO_NAME}.image.tag"
+  fi
 }
 
 update_version() {
   echo "--- UPDATE VERSION ---"
   export COMMIT_HASH
-  export IMAGE_TAG_VALUE
+  export IMAGE_TAG_LOCATION
   cd "${WORKSPACE}/${REPO_NAME}" || exit 1
-  yq -i "${IMAGE_TAG_VALUE} = env(COMMIT_HASH)" values.yaml
+  yq -i "${IMAGE_TAG_LOCATION} = env(COMMIT_HASH)" values.yaml
   git config --global user.name "argo-ci"
   git config --global user.email "argo-ci@gepardec.com"
   git add .
@@ -106,7 +111,7 @@ yq_update_application() {
   export BRANCH
   export NAME=${REPO_NAME%-${CI_REPOSITORY_SUFFIX}}-${NAMESPACE}
 
-  yq -i '.metadata.name = env(NAME) | .spec.destination.namespace = env(NAME) | .spec.source.targetRevision = env(BRANCH)' application.yml
+  yq -i '.metadata.name = env(NAME) | .spec.destination.namespace = env(NAME) | .spec.source.targetRevision = env(BRANCH)' application.yaml
 }
 
 update_namespace() {
@@ -116,11 +121,11 @@ update_namespace() {
   git config --global user.name "argo-ci"
   git config --global user.email "argo-ci@gepardec.com"
   git add .
-  git commit -m "created branch ${BRANCH} and updated application.yml" || true
+  git commit -m "created branch ${BRANCH} and updated application.yaml" || true
   git push --set-upstream origin "${BRANCH}"
   echo "WORKSPACE: ${WORKSPACE}"
   echo "REPONAME: ${REPO_NAME}"
-  cp "${WORKSPACE}/${REPO_NAME}/application.yml" "${WORKSPACE}/application.yml"
+  cp "${WORKSPACE}/${REPO_NAME}/application.yaml" "${WORKSPACE}/application.yaml"
 }
 
 delete_branch() {
@@ -130,7 +135,7 @@ delete_branch() {
     exit 1
   fi
   cd "${WORKSPACE}/${REPO_NAME}"  || exit 1
-  cp "${WORKSPACE}"/"${REPO_NAME}"/application.yml "${WORKSPACE}"/application.yml
+  cp "${WORKSPACE}"/"${REPO_NAME}"/application.yaml "${WORKSPACE}"/application.yaml
   git checkout main
   git branch -D ${BRANCH}
   git config --global user.name "argo-ci"
@@ -200,7 +205,8 @@ while true ; do
       shift 2
       ;;
     --image-tag-value)
-      IMAGE_TAG_VALUE="${2}"
+      IMAGE_TAG_LOCATION="${2}"
+      DEFAULT_IMAGE_TAG_LOCATION=false
       shift 2
       ;;
     *)
