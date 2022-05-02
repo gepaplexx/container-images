@@ -84,12 +84,13 @@ extract_git_commit() {
 
 update_vars() {
   echo "--- UPDATE VARS ---"
-  CLONE_URL="${CLONE_URL%.git}-${CI_REPOSITORY_SUFFIX}.git"
-  REPO_NAME="${REPO_NAME}-${CI_REPOSITORY_SUFFIX}"
 
   if [[ ${DEFAULT_IMAGE_TAG_LOCATION} ]]; then
-    IMAGE_TAG_LOCATION="${REPO_NAME}.image.tag"
+    IMAGE_TAG_LOCATION=".${REPO_NAME}.image.tag"
   fi
+
+  CLONE_URL="${CLONE_URL%.git}-${CI_REPOSITORY_SUFFIX}.git"
+  REPO_NAME="${REPO_NAME}-${CI_REPOSITORY_SUFFIX}"
 }
 
 update_version() {
