@@ -437,6 +437,10 @@ applications:
           value: "${GITHUB_CICD_TOOLS_WORFKLOWREPOSITORY_SSHPRIVATEKEY}"
         - name: "argocd.workflowrepository.enabled"
           value: "${GITHUB_CICD_TOOLS_WORKFLOWREPOSITORY_ENABLED}"
+        - name: "sealedSecrets.postgresql.password"
+          value: "${GEPAPLEXX_CICD_TOOLS_PSQL_PASSWORD}"
+        - name: "sealedSecrets.postgresql.postgresPassword"
+          value: "${GEPAPLEXX_CICD_TOOLS_PSQL_POSTGRES_PASSWORD}"
     syncPolicy:
       automated:
         prune: true
