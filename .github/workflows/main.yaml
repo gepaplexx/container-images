@@ -26,7 +26,7 @@ jobs:
           dockerfile: git-workflows/Containerfile
           directory:  git-workflows
           addLatest: true
-          tags: ${{ steps.source-version.outputs.version }}
+          tags: ${{ steps.source-version.outputs.version }},latest
   build-maven:
     runs-on: ubuntu-latest
     steps:
@@ -46,7 +46,7 @@ jobs:
           dockerfile: maven/Containerfile
           directory: maven
           addLatest: true
-          tags: ${{ steps.source-version.outputs.version }}
+          tags: ${{ steps.source-version.outputs.version }},latest
   build-slack-notification:
     runs-on: ubuntu-latest
     steps:
@@ -66,7 +66,7 @@ jobs:
           dockerfile: slack-notifications/Containerfile
           directory: slack-notifications
           addLatest: true
-          tags: ${{ steps.source-version.outputs.version }}
+          tags: ${{ steps.source-version.outputs.version }},latest
   build-day-2-setup-generator:
     runs-on: ubuntu-latest
     steps:
@@ -86,7 +86,7 @@ jobs:
           dockerfile: day-2-setup-generator/Containerfile
           directory: day-2-setup-generator
           addLatest: true
-          tags: ${{ steps.source-version.outputs.version }}
+          tags: ${{ steps.source-version.outputs.version }},latest
   build-argocd:
     runs-on: ubuntu-latest
     steps:
@@ -106,7 +106,7 @@ jobs:
           dockerfile: argocd/Containerfile
           directory: argocd
           addLatest: true
-          tags: ${{ steps.source-version.outputs.version }}
+          tags: ${{ steps.source-version.outputs.version }},latest
   notify:
     name: Slack Notifications
     runs-on: ubuntu-latest

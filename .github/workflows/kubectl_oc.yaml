@@ -10,7 +10,7 @@ jobs:
   build-kubectl-oc-4-9:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+ - uses: actions/checkout@v2
         name: checkout
       - uses: mr-smithers-excellent/docker-build-push@v5
         name: build-openshift-4.9
@@ -23,6 +23,7 @@ jobs:
           directory: kubectl-oc
           addLatest: true
           buildArgs: OC_VERSION=4.9
+          tags: latest
   build-kubectl-oc-4-10:
     runs-on: ubuntu-latest
     steps:
@@ -39,6 +40,7 @@ jobs:
           directory: kubectl-oc
           addLatest: true
           buildArgs: OC_VERSION=4.10
+          tags: latest
   build-kubectl-oc-latest:
     runs-on: ubuntu-latest
     steps:
@@ -56,6 +58,7 @@ jobs:
           addLatest: true
           tags: v4.10
           buildArgs: OC_VERSION=4.10
+          tags: latest
   notify:
     name: Slack Notifications
     runs-on: ubuntu-latest
