@@ -99,6 +99,7 @@ update_version() {
   export IMAGE_TAG_LOCATION
   cd "${WORKSPACE}/${REPO_NAME}" || exit 1
   yq -i "${IMAGE_TAG_LOCATION} = env(COMMIT_HASH)" values.yaml
+  yq -i "${IMAGE_TAG_LOCATION} style=\"double\"" values.yaml
   git config --global user.name "argo-ci"
   git config --global user.email "argo-ci@gepardec.com"
   git add .
