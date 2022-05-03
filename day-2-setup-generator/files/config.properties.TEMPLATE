@@ -15,10 +15,6 @@ GIT_RESTRICTED_ORGS=
 SLACK_CHANNEL_CU=
 CONSOLE_URL=
 
-####################### VELERO #######################
-ENABLE_VELERO=true
-# TODO mit Felix besprechen wie aktuelle umsetzung aussieht
-
 ################## CLUSTER-CONFIG ####################
 ALERTMANAGER_CONFIG=
 SLACK_CHANNEL_AM=
