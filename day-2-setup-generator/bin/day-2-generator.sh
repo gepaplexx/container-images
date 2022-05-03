@@ -273,10 +273,8 @@ function configureGepaplexxCicdTools() {
     printf "Cleanup..."
     rm generated/gepaplexxcicd-repository-secret.yaml
     [[ $? = 0 ]] && printSuccess || printFailureAndExit "Cleanup"
-}
 
-function configurePostgreSealedSecret() {
-    printf "generating sealed secret for cicd-tools postgre db..."
+    printf "generating sealed secret for cicd-tools postgres db..."
     cat templates/secret-postgresql-creds.yaml.TEMPLATE \
         | envsubst '$GEPAPLEXX_CICD_TOOLS_PSQL_PASSWORD:$GEPAPLEXX_CICD_TOOLS_PSQL_POSTGRES_PASSWORD' \
         | kubeseal --cert generated/${ENV}.crt -o yaml > generated/postgreql-creds-secret.yaml
@@ -362,9 +360,6 @@ function main() {
 
     printActionHeader "CONFIGURE GEPAPLEXX CICD TOOLS" $yellow
     configureGepaplexxCicdTools
-
-    printActionHeader "CONFIGURE POSTGRE SEALED SECRET" $yellow
-    configurePostgreSealedSecret
 
     printActionHeader "SUMMARY" $green
     printf "Successfully generated values for environment '${ENV}': generated/values-${ENV}.yaml\n"
