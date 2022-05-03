@@ -275,6 +275,25 @@ function configureGepaplexxCicdTools() {
     [[ $? = 0 ]] && printSuccess || printFailureAndExit "Cleanup"
 }
 
+function configurePostgreSealedSecret() {
+    printf "generating sealed secret for cicd-tools postgre db..."
+    cat templates/secret-postgresql-creds.yaml.TEMPLATE \
+        | envsubst '$GEPAPLEXX_CICD_TOOLS_PSQL_PASSWORD:$GEPAPLEXX_CICD_TOOLS_PSQL_POSTGRES_PASSWORD' \
+        | kubeseal --cert generated/${ENV}.crt -o yaml > generated/postgreql-creds-secret.yaml
+
+    [[ $? = 0 ]] && printSuccess || printFailureAndExit "Generating"
+    printf "Replacing parameters in values-${ENV}.yaml..."
+
+    export GEPAPLEXX_CICD_TOOLS_PSQL_PASSWORD=$(cat generated/postgreql-creds-secret.yaml | grep password | grep -v postgres-password | cut -d ':' -f 2 | xargs)
+    export GEPAPLEXX_CICD_TOOLS_PSQL_POSTGRES_PASSWORD=$(cat generated/postgreql-creds-secret.yaml | grep postgres-password | cut -d ':' -f 2 | xargs)
+
+    replace '$GEPAPLEXX_CICD_TOOLS_PSQL_PASSWORD:$GEPAPLEXX_CICD_TOOLS_PSQL_POSTGRES_PASSWORD'
+
+    printf "Cleanup..."
+    rm generated/postgreql-creds-secret.yaml
+    [[ $? = 0 ]] && printSuccess || printFailureAndExit "Cleanup"
+}
+
 function checkPrerequisites() {
     ok=true
     printf "envsubst is installed..."
@@ -343,6 +362,9 @@ function main() {
 
     printActionHeader "CONFIGURE GEPAPLEXX CICD TOOLS" $yellow
     configureGepaplexxCicdTools
+
+    printActionHeader "CONFIGURE POSTGRE SEALED SECRET" $yellow
+    configurePostgreSealedSecret
 
     printActionHeader "SUMMARY" $green
     printf "Successfully generated values for environment '${ENV}': generated/values-${ENV}.yaml\n"
