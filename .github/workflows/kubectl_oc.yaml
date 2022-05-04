@@ -56,9 +56,8 @@ jobs:
           dockerfile: kubectl-oc/Containerfile
           directory: kubectl-oc
           addLatest: true
-          tags: v4.10
+          tags: v4.10,latest
           buildArgs: OC_VERSION=4.10
-          tags: latest
   notify:
     name: Slack Notifications
     runs-on: ubuntu-latest
