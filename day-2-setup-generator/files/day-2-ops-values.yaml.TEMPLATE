@@ -548,7 +548,7 @@ applications:
 ####################### NFS-STORAGE-PROVISIONER ######################
   nfs-provisioner:
     name: nfs
-    enabled: false
+    enabled: true
     argoProject: gepaplexx
     destination:
       namespace: nfs-storage-provisioner
