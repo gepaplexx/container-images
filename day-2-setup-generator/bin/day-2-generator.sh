@@ -75,7 +75,7 @@ function encryptSealedSecretCertificateForAnsibleVault() {
     read -s password
     echo ${password} >> vault.password
     printf "\nEncrypting certificate for sealed secret..."
-    ansible-vault encrypt_string --vault-password-file vault.password --name 'sealedSecretCertificate' -- "$(cat generated/${ENV}.crt)" > generated/${ENV}-crt-vault.yaml
+    ansible-vault encrypt_string --vault-password-file vault.password --name 'sealedSecretCertificate' -- "$(cat generated/${ENV}.crt | base64 -w0)" > generated/${ENV}-crt-vault.yaml
     [[ $? = 0 ]] && printSuccess || printFailureAndExit "Encrypting"
 
     printf "\nCopy the following part (red) into inventory-spoke-gepaplexx-${ENV}/group-vars/all/vault.yaml\n"
@@ -85,7 +85,7 @@ function encryptSealedSecretCertificateForAnsibleVault() {
 
     printActionHeader "ENCRYPT SEALED SECRET KEY FOR VAULT" $yellow
     printf "Encrypting key for sealed secret..."
-    ansible-vault encrypt_string --vault-password-file vault.password --name 'sealedSecretPrivateKey' -- "$(cat generated/${ENV}.key)" > generated/${ENV}-key-vault.yaml
+    ansible-vault encrypt_string --vault-password-file vault.password --name 'sealedSecretPrivateKey' -- "$(cat generated/${ENV}.key | base64 -w0)" > generated/${ENV}-key-vault.yaml
     [[ $? = 0 ]] && printSuccess || printFailureAndExit "Encrypting"
 
     printf "\nCopy the following part (red) into inventory-spoke-gepaplexx-${ENV}/group-vars/all/vault.yaml\n"
