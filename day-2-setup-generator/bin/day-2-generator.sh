@@ -231,6 +231,10 @@ function configureClusterCertificates() {
     export SOLVERS_ACCESSKEYID=$SOLVERS_ACCESSKEYID
     export SOLVERS_SECRETNAME=$SOLVERS_SECRETNAME
     export SOLVERS_SECRETACCESSKEY=$SOLVERS_SECRETACCESSKEY
+    cat templates/secret-route53-credentials-secret.yaml.TEMPLATE \
+            | envsubst '$SOLVERS_SECRETACCESSKEY' \
+            | kubeseal --cert generated/${ENV}.crt -o yaml > generated/route-53-credentials-secret.yaml
+    export SOLVERS_SECRETACCESSKEY=$(cat generated/route-53-credentials-secret.yaml | grep secret-access-key | cut -d ':' -f 2 | xargs)
     replace '$SOLVERS_DNS_ZONE:$SOLVERS_ACCESSKEYID:$SOLVERS_SECRETNAME:$SOLVERS_SECRETACCESSKEY'
 
     printf "Configure cluster issuer certificates..."
@@ -238,6 +242,10 @@ function configureClusterCertificates() {
     export CERTIFICATES_CONSOLE=$CERTIFICATES_CONSOLE
     export CERTIFICATES_API=$CERTIFICATES_API
     replace '$CERTIFICATES_DEFAULTINGRESS:$CERTIFICATES_CONSOLE:$CERTIFICATES_API'
+
+    printf "Cleanup..."
+    rm generated/route-53-credentials-secret.yaml
+    [[ $? = 0 ]] && printSuccess || printFailureAndExit "Cleanup"
 }
 
 function configureConsolePatches() {
