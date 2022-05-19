@@ -111,8 +111,12 @@ applications:
         parameters:
           - name: "alertmanager.config"
             value: "${ENCRYPTED_YAML}"
-#          - name: "argocd.infranodes.enabled"
-#            value: "true"
+          - name: "argocd.infranodes.enabled"
+            value: "true"
+          - name: "argocd.workflowrepository.username"
+            value: "${GITHUB_CICD_TOOLS_WORKFLOWREPOSITORY_USERNAME}"
+          - name: "argocd.workflowrepository.sshPrivateKey"
+            value: "${GITHUB_CICD_TOOLS_WORKFLOWREPOSITORY_SSHPRIVATEKEY}"
     syncPolicy:
       automated:
         prune: true
@@ -209,8 +213,8 @@ applications:
       targetRevision: "*"
       helm:
         parameters:
-#        - name: "infranodes.enabled"
-#          value: "true"
+        - name: "infranodes.enabled"
+          value: "true"
         - name: "elasticsearch.nodeCount"
           value: "2"
     syncPolicy:
@@ -250,8 +254,8 @@ applications:
       targetRevision: "*"
       helm:
         parameters:
-#        - name: "infranodes.enabled"
-#          value: "true"
+        - name: "infranodes.enabled"
+          value: "true"
     syncPolicy:
       automated:
         prune: true
@@ -432,9 +436,9 @@ applications:
           value: "${GEPAPLEXX_CICD_TOOLS_ROLLOUTS_ROUTE_HOSTNAME}"
         # Access to gepaplexx/gepaplexx-cicd repository!
         - name: "argocd.workflowrepository.username"
-          value: "${GITHUB_CICD_TOOLS_WORFKLOWREPOSITORY_USERNAME}"
+          value: "${GITHUB_CICD_TOOLS_WORKFLOWREPOSITORY_USERNAME}"
         - name: "argocd.workflowrepository.sshPrivateKey"
-          value: "${GITHUB_CICD_TOOLS_WORFKLOWREPOSITORY_SSHPRIVATEKEY}"
+          value: "${GITHUB_CICD_TOOLS_WORKFLOWREPOSITORY_SSHPRIVATEKEY}"
         - name: "argocd.workflowrepository.enabled"
           value: "${GITHUB_CICD_TOOLS_WORKFLOWREPOSITORY_ENABLED}"
         - name: "sealedSecrets.postgresql.password"
