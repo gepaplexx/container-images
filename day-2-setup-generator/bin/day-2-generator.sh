@@ -242,10 +242,10 @@ function configureClusterCertificates() {
     export CERTIFICATES_CONSOLE=$CERTIFICATES_CONSOLE
     export CERTIFICATES_API=$CERTIFICATES_API
     replace '$CERTIFICATES_DEFAULTINGRESS:$CERTIFICATES_CONSOLE:$CERTIFICATES_API'
-#
-#    printf "Cleanup..."
-#    rm generated/route-53-credentials-secret.yaml
-#    [[ $? = 0 ]] && printSuccess || printFailureAndExit "Cleanup"
+
+    printf "Cleanup..."
+    rm generated/route-53-credentials-secret.yaml
+    [[ $? = 0 ]] && printSuccess || printFailureAndExit "Cleanup"
 }
 
 function configureConsolePatches() {
