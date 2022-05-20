@@ -232,7 +232,7 @@ function configureClusterCertificates() {
     export SOLVERS_SECRETNAME=$SOLVERS_SECRETNAME
     export SOLVERS_SECRETACCESSKEY=$SOLVERS_SECRETACCESSKEY
     cat templates/secret-route53-credentials-secret.yaml.TEMPLATE \
-            | envsubst '$SOLVERS_SECRETACCESSKEY' \
+            | envsubst '$SOLVERS_SECRETACCESSKEY:$ENV' \
             | kubeseal --cert generated/${ENV}.crt -o yaml > generated/route-53-credentials-secret.yaml
     export SOLVERS_SECRETACCESSKEY=$(cat generated/route-53-credentials-secret.yaml | grep secret-access-key | cut -d ':' -f 2 | xargs)
     replace '$SOLVERS_DNS_ZONE:$SOLVERS_ACCESSKEYID:$SOLVERS_SECRETNAME:$SOLVERS_SECRETACCESSKEY'
@@ -242,10 +242,10 @@ function configureClusterCertificates() {
     export CERTIFICATES_CONSOLE=$CERTIFICATES_CONSOLE
     export CERTIFICATES_API=$CERTIFICATES_API
     replace '$CERTIFICATES_DEFAULTINGRESS:$CERTIFICATES_CONSOLE:$CERTIFICATES_API'
-
-    printf "Cleanup..."
-    rm generated/route-53-credentials-secret.yaml
-    [[ $? = 0 ]] && printSuccess || printFailureAndExit "Cleanup"
+#
+#    printf "Cleanup..."
+#    rm generated/route-53-credentials-secret.yaml
+#    [[ $? = 0 ]] && printSuccess || printFailureAndExit "Cleanup"
 }
 
 function configureConsolePatches() {
@@ -261,26 +261,9 @@ function configureGepaplexxCicdTools() {
     export GEPAPLEXX_CICD_TOOLS_WORKFLOWS_ROUTE_HOSTNAME=${GEPAPLEXX_CICD_TOOLS_WORKFLOWS_ROUTE_HOSTNAME}
     replace '$GEPAPLEXX_CICD_TOOLS_ARGOCD_ROUTE_HOSTNAME:$GEPAPLEXX_CICD_TOOLS_ROLLOUTS_ROUTE_HOSTNAME:$GEPAPLEXX_CICD_TOOLS_WORKFLOWS_ROUTE_HOSTNAME'
 
-    printf "generating sealed secret values for gepaplexx-cicd-repository..."
-    export GITHUB_CICD_TOOLS_WORKFLOWREPOSITORY_SSHPRIVATEKEY=$(echo GITHUB_CICD_TOOLS_WORKFLOWREPOSITORY_SSHPRIVATEKEY | base64 -w 0)
-    export GITHUB_CICD_TOOLS_WORKFLOWREPOSITORY_USERNAME=$(echo $GITHUB_CICD_TOOLS_WORKFLOWREPOSITORY_USERNAME | base64 -w 0)
-
-    cat templates/secret-cicd-repository-git.yaml.TEMPLATE \
-        | envsubst '$GITHUB_CICD_TOOLS_WORKFLOWREPOSITORY_SSHPRIVATEKEY:$GITHUB_CICD_TOOLS_WORKFLOWREPOSITORY_USERNAME' \
-        | kubeseal --cert generated/${ENV}.crt -o yaml > generated/gepaplexxcicd-repository-secret.yaml
 
     [[ $? = 0 ]] && printSuccess || printFailureAndExit "Generating"
     printf "Replacing parameters in values-${ENV}.yaml..."
-
-    export GITHUB_CICD_TOOLS_WORKFLOWREPOSITORY_SSHPRIVATEKEY=$(cat generated/gepaplexxcicd-repository-secret.yaml | grep sshPrivateKey | cut -d ':' -f 2 | xargs)
-    export GITHUB_CICD_TOOLS_WORKFLOWREPOSITORY_USERNAME=$(cat generated/gepaplexxcicd-repository-secret.yaml | grep username | cut -d ':' -f 2 | xargs)
-    export GITHUB_CICD_TOOLS_WORKFLOWREPOSITORY_ENABLED=${GITHUB_CICD_TOOLS_WORKFLOWREPOSITORY_ENABLED}
-
-    replace '$GITHUB_CICD_TOOLS_WORKFLOWREPOSITORY_SSHPRIVATEKEY:$GITHUB_CICD_TOOLS_WORKFLOWREPOSITORY_USERNAME:$GITHUB_CICD_TOOLS_WORKFLOWREPOSITORY_ENABLED'
-
-    printf "Cleanup..."
-    rm generated/gepaplexxcicd-repository-secret.yaml
-    [[ $? = 0 ]] && printSuccess || printFailureAndExit "Cleanup"
 
     printf "generating sealed secret for cicd-tools postgres db..."
     cat templates/secret-postgresql-creds.yaml.TEMPLATE \
