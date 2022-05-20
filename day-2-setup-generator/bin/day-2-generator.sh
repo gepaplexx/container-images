@@ -119,9 +119,9 @@ function removeIdentityProvGit() {
 
 function configureIdentityProvGoogle() {    
     printf "generating sealed secret values for google oauth identity provider..."
-    export GOOGLE_CLIENTSECRET=$(echo $GOOGLE_CLIENTSECRET | base64 -w 0)
-    export GOOGLE_CLIENTID=$(echo $GOOGLE_CLIENTID | base64 -w 0)
-    export GOOGLE_RESTRICTED_DOMAIN=$(echo $GOOGLE_RESTRICTED_DOMAIN | base64 -w 0)
+    export GOOGLE_CLIENTSECRET=$(printf "$GOOGLE_CLIENTSECRET" | base64)
+    export GOOGLE_CLIENTID=$(printf "$GOOGLE_CLIENTID" | base64)
+    export GOOGLE_RESTRICTED_DOMAIN=$(printf "$GOOGLE_RESTRICTED_DOMAIN" | base64)
 
     cat templates/secret-ip-google.yaml.TEMPLATE \
         | envsubst '$GOOGLE_CLIENTSECRET:$GOOGLE_CLIENTID:$GOOGLE_RESTRICTED_DOMAIN' \
@@ -144,9 +144,9 @@ function configureIdentityProvGoogle() {
 
 function configureIdentityProvGit() {
     printf "Generating sealed secret values for git oauth identity provider..."
-    export GIT_CLIENTSECRET=$(echo $GIT_CLIENTSECRET | base64 -w 0)
-    export GIT_CLIENTID=$(echo $GIT_CLIENTID | base64 -w 0)
-    export GIT_RESTRICTED_ORGS=$(echo $GIT_RESTRICTED_ORGS | base64 -w 0)
+    export GIT_CLIENTSECRET=$(printf "$GIT_CLIENTSECRET" | base64)
+    export GIT_CLIENTID=$(printf "$GIT_CLIENTID" | base64)
+    export GIT_RESTRICTED_ORGS=$(printf "$GIT_RESTRICTED_ORGS" | base64)
 
     cat templates/secret-ip-git.yaml.TEMPLATE \
         | envsubst '$GIT_CLIENTSECRET:$GIT_CLIENTID:$GIT_RESTRICTED_ORGS' \
@@ -171,7 +171,7 @@ function configureClusterUpdater() {
     printf "Generating values for cluster updater..."
     export ENV=${ENV}
     export CONSOLE_URL=$CONSOLE_URL
-    export SLACK_B64=$(echo $SLACK_CHANNEL_CU | base64 -w 0)
+    export SLACK_B64=$(printf "$SLACK_CHANNEL_CU" | base64)
     [[ $? = 0 ]] && printSuccess || printFailureAndExit "Generating"
 
     printf "Replacing parameters in values-${ENV}.yaml..."
