@@ -119,9 +119,9 @@ function removeIdentityProvGit() {
 
 function configureIdentityProvGoogle() {    
     printf "generating sealed secret values for google oauth identity provider..."
-    export GOOGLE_CLIENTSECRET=$(printf "$GOOGLE_CLIENTSECRET" | base64)
-    export GOOGLE_CLIENTID=$(printf "$GOOGLE_CLIENTID" | base64)
-    export GOOGLE_RESTRICTED_DOMAIN=$(printf "$GOOGLE_RESTRICTED_DOMAIN" | base64)
+    export GOOGLE_CLIENTSECRET=$(printf "$GOOGLE_CLIENTSECRET" | base64 -w0)
+    export GOOGLE_CLIENTID=$(printf "$GOOGLE_CLIENTID" | base64 -w0)
+    export GOOGLE_RESTRICTED_DOMAIN=$(printf "$GOOGLE_RESTRICTED_DOMAIN" | base64 -w0)
 
     cat templates/secret-ip-google.yaml.TEMPLATE \
         | envsubst '$GOOGLE_CLIENTSECRET:$GOOGLE_CLIENTID:$GOOGLE_RESTRICTED_DOMAIN' \
@@ -144,9 +144,9 @@ function configureIdentityProvGoogle() {
 
 function configureIdentityProvGit() {
     printf "Generating sealed secret values for git oauth identity provider..."
-    export GIT_CLIENTSECRET=$(printf "$GIT_CLIENTSECRET" | base64)
-    export GIT_CLIENTID=$(printf "$GIT_CLIENTID" | base64)
-    export GIT_RESTRICTED_ORGS=$(printf "$GIT_RESTRICTED_ORGS" | base64)
+    export GIT_CLIENTSECRET=$(printf "$GIT_CLIENTSECRET" | base64 -w0)
+    export GIT_CLIENTID=$(printf "$GIT_CLIENTID" | base64 -w0)
+    export GIT_RESTRICTED_ORGS=$(printf "$GIT_RESTRICTED_ORGS" | base64 -w0)
 
     cat templates/secret-ip-git.yaml.TEMPLATE \
         | envsubst '$GIT_CLIENTSECRET:$GIT_CLIENTID:$GIT_RESTRICTED_ORGS' \
@@ -171,7 +171,7 @@ function configureClusterUpdater() {
     printf "Generating values for cluster updater..."
     export ENV=${ENV}
     export CONSOLE_URL=$CONSOLE_URL
-    export SLACK_B64=$(printf "$SLACK_CHANNEL_CU" | base64)
+    export SLACK_B64=$(printf "$SLACK_CHANNEL_CU" | base64 -w0)
     [[ $? = 0 ]] && printSuccess || printFailureAndExit "Generating"
 
     printf "Replacing parameters in values-${ENV}.yaml..."
@@ -192,20 +192,30 @@ function configureClusterConfig() {
         AM_YAML=$ALERTMANAGER_CONFIG
     fi
     
-    export ALERTMANAGER_CONFIG=$(cat $AM_YAML | base64 -w 0)
+    export ALERTMANAGER_CONFIG=$(cat $AM_YAML | base64 -w0)
     cat templates/secret-alertmanager.yaml.TEMPLATE \
         | envsubst '$ALERTMANAGER_CONFIG' \
         | kubeseal --cert generated/${ENV}.crt -o yaml > generated/alertmanager-secret.yaml
+
+    export GITHUB_CICD_TOOLS_WORKFLOWREPOSITORY_USERNAME=$( printf "$GITHUB_CICD_TOOLS_WORKFLOWREPOSITORY_USERNAME" | base64 -w0)
+    export GITHUB_CICD_TOOLS_WORKFLOWREPOSITORY_SSHPRIVATEKEY=$GITHUB_CICD_TOOLS_WORKFLOWREPOSITORY_SSHPRIVATEKEY
+    export GITHUB_CICD_TOOLS_WORKFLOWREPOSITORY_ENABLED=$GITHUB_CICD_TOOLS_WORKFLOWREPOSITORY_ENABLED
+    cat templates/secret-cicd-repository-git.yaml.TEMPLATE \
+        | envsubst '$GITHUB_CICD_TOOLS_WORKFLOWREPOSITORY_USERNAME:$GITHUB_CICD_TOOLS_WORKFLOWREPOSITORY_SSHPRIVATEKEY:$GITHUB_CICD_TOOLS_WORKFLOWREPOSITORY_ENABLED' \
+        | kubeseal --cert generated/${ENV}.crt -o yaml > generated/cicd-repository-git-secret.yaml
 
     [[ $? = 0 ]] && printSuccess || printFailureAndExit "Generating"
 
     printf "Replacing parameters in values-${ENV}.yaml..."
     export ENCRYPTED_YAML=$(cat generated/alertmanager-secret.yaml | grep alertmanager.yaml | cut -d ':' -f 2 | xargs)
-    replace '$ENCRYPTED_YAML'
+    export GITHUB_CICD_TOOLS_WORKFLOWREPOSITORY_USERNAME=$(cat generated/cicd-repository-git-secret.yaml | grep username | cut -d ':' -f 2 | xargs)
+    export GITHUB_CICD_TOOLS_WORKFLOWREPOSITORY_SSHPRIVATEKEY=$(cat generated/cicd-repository-git-secret.yaml | grep sshPrivateKey | cut -d ':' -f 2 | xargs)
+    replace '$ENCRYPTED_YAML:$GITHUB_CICD_TOOLS_WORKFLOWREPOSITORY_USERNAME:$GITHUB_CICD_TOOLS_WORKFLOWREPOSITORY_SSHPRIVATEKEY'
 
     printf "Cleanup..."
     rm generated/alertmanager-secret.yaml
     rm generated/alertmanager.yaml
+    rm generated/cicd-repository-git-secret.yaml
     [[ $? = 0 ]] && printSuccess || printFailureAndExit "Cleanup"
 }
 
@@ -230,7 +240,7 @@ function configureClusterCertificates() {
     export SOLVERS_DNS_ZONE=$SOLVERS_DNS_ZONE
     export SOLVERS_ACCESSKEYID=$SOLVERS_ACCESSKEYID
     export SOLVERS_SECRETNAME=$SOLVERS_SECRETNAME
-    export SOLVERS_SECRETACCESSKEY=$SOLVERS_SECRETACCESSKEY
+    export SOLVERS_SECRETACCESSKEY=$(printf "$SOLVERS_SECRETACCESSKEY" | base64 -w0)
     cat templates/secret-route53-credentials-secret.yaml.TEMPLATE \
             | envsubst '$SOLVERS_SECRETACCESSKEY:$ENV' \
             | kubeseal --cert generated/${ENV}.crt -o yaml > generated/route-53-credentials-secret.yaml
