@@ -434,13 +434,6 @@ applications:
           value: "${GEPAPLEXX_CICD_TOOLS_ROLLOUTS_ROUTE_HOSTNAME}"
         - name: "argo_rollouts.dashboard.ingress.tls[0].secretName"
           value: "${GEPAPLEXX_CICD_TOOLS_ROLLOUTS_ROUTE_HOSTNAME}"
-        # Access to gepaplexx/gepaplexx-cicd repository!
-        - name: "argocd.workflowrepository.username"
-          value: "${GITHUB_CICD_TOOLS_WORKFLOWREPOSITORY_USERNAME}"
-        - name: "argocd.workflowrepository.sshPrivateKey"
-          value: "${GITHUB_CICD_TOOLS_WORKFLOWREPOSITORY_SSHPRIVATEKEY}"
-        - name: "argocd.workflowrepository.enabled"
-          value: "${GITHUB_CICD_TOOLS_WORKFLOWREPOSITORY_ENABLED}"
         - name: "sealedSecrets.postgresql.password"
           value: "${GEPAPLEXX_CICD_TOOLS_PSQL_PASSWORD}"
         - name: "sealedSecrets.postgresql.postgresPassword"
