@@ -274,6 +274,8 @@ function configureGepaplexxCicdTools() {
 
     [[ $? = 0 ]] && printSuccess || printFailureAndExit "Generating"
     printf "Replacing parameters in values-${ENV}.yaml..."
+    export GEPAPLEXX_CICD_TOOLS_PSQL_PASSWORD=$(printf "$GEPAPLEXX_CICD_TOOLS_PSQL_PASSWORD" | base64 -w0)
+    export GEPAPLEXX_CICD_TOOLS_PSQL_POSTGRES_PASSWORD=$(printf "$GEPAPLEXX_CICD_TOOLS_PSQL_POSTGRES_PASSWORD" | base64 -w0)
 
     printf "generating sealed secret for cicd-tools postgres db..."
     cat templates/secret-postgresql-creds.yaml.TEMPLATE \
@@ -283,13 +285,13 @@ function configureGepaplexxCicdTools() {
     [[ $? = 0 ]] && printSuccess || printFailureAndExit "Generating"
     printf "Replacing parameters in values-${ENV}.yaml..."
 
-    export GEPAPLEXX_CICD_TOOLS_PSQL_PASSWORD=$(cat generated/postgreql-creds-secret.yaml | grep password | grep -v postgres-password | cut -d ':' -f 2 | xargs)
+    export GEPAPLEXX_CICD_TOOLS_PSQL_PASSWORD=$(cat generated/postgreql-creds-secret.yaml | grep password | cut -d ':' -f 2 | xargs)
     export GEPAPLEXX_CICD_TOOLS_PSQL_POSTGRES_PASSWORD=$(cat generated/postgreql-creds-secret.yaml | grep postgres-password | cut -d ':' -f 2 | xargs)
 
     replace '$GEPAPLEXX_CICD_TOOLS_PSQL_PASSWORD:$GEPAPLEXX_CICD_TOOLS_PSQL_POSTGRES_PASSWORD'
 
     printf "Cleanup..."
-    rm generated/postgreql-creds-secret.yaml
+#    rm generated/postgreql-creds-secret.yaml
     [[ $? = 0 ]] && printSuccess || printFailureAndExit "Cleanup"
 }
 
