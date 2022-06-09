@@ -119,7 +119,7 @@ jobs:
       - uses: mr-smithers-excellent/docker-build-push@v5
         name: push-container-image
         with:
-          image: argocd
+          image: newman
           registry: ghcr.io
           username: ${{ github.repository }}
           password: ${{ secrets.GHCR_TOKEN }}
@@ -137,6 +137,7 @@ jobs:
       - build-slack-notification
       - build-day-2-setup-generator
       - build-argocd
+      - build-newman
     steps:
       - name: Notify Slack channel on failure
         uses: rtCamp/action-slack-notify@v2
