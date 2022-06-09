@@ -107,6 +107,26 @@ jobs:
           directory: argocd
           addLatest: true
           tags: ${{ steps.source-version.outputs.version }},latest
+  build-newman:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        name: checkout
+      - name: source-version
+        id: source-version
+        run: |
+          echo "::set-output name=version::$(cat newman/version)"
+      - uses: mr-smithers-excellent/docker-build-push@v5
+        name: push-container-image
+        with:
+          image: argocd
+          registry: ghcr.io
+          username: ${{ github.repository }}
+          password: ${{ secrets.GHCR_TOKEN }}
+          dockerfile: newman/Containerfile
+          directory: newman
+          addLatest: true
+          tags: ${{ steps.source-version.outputs.version }},latest
   notify:
     name: Slack Notifications
     runs-on: ubuntu-latest
