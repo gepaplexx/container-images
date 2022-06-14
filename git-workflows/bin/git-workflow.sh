@@ -131,8 +131,8 @@ update_namespace() {
 }
 
 extract_vars() {
-  yq e '.metadata.name' application.yaml > application
-  yq e '.spec.destination.namespace' application.yaml > namespace
+  yq e '.metadata.name' application.yaml > ${WORKSPACE}/application
+  yq e '.spec.destination.namespace' application.yaml > ${WORKSPACE}/namespace
 }
 
 delete_branch() {
