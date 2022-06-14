@@ -130,6 +130,11 @@ update_namespace() {
   cp "${WORKSPACE}/${REPO_NAME}/application.yaml" "${WORKSPACE}/application.yaml"
 }
 
+extract_vars() {
+  yq e '.metadata.name' application.yaml > application
+  yq e '.spec.destination.namespace' application.yaml > namespace
+}
+
 delete_branch() {
   echo "--- DELETE BRANCH ---"
   if [ "${BRANCH}" == "main" ] || [ "${BRANCH}" == "master" ]; then
@@ -245,6 +250,7 @@ main() {
     git_clone
     git_checkout
     update_version
+    extract_vars
     exit 0
   fi
   if [ "${DO_CLONE}" == true ]; then
