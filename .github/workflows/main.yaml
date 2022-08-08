@@ -115,7 +115,6 @@ jobs:
       - build-git-workflows
       - build-maven
       - build-slack-notification
-      - build-day-2-setup-generator
       - build-argocd
       - build-newman
     steps:
