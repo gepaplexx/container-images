@@ -64,26 +64,6 @@ jobs:
           directory: slack-notifications
           addLatest: true
           tags: ${{ steps.source-version.outputs.version }}-${{ github.ref_name }}
-  build-day-2-setup-generator:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-        name: checkout
-      - name: source-version
-        id: source-version
-        run: |
-          echo "::set-output name=version::$(cat day-2-setup-generator/version)"
-      - uses: mr-smithers-excellent/docker-build-push@v5
-        name: push-container-image
-        with:
-          image: day-2-setup-generator
-          registry: ghcr.io
-          username: ${{ github.repository }}
-          password: ${{ secrets.GHCR_TOKEN }}
-          dockerfile: day-2-setup-generator/Containerfile
-          directory: day-2-setup-generator
-          addLatest: true
-          tags: ${{ steps.source-version.outputs.version }}-${{ github.ref_name }}
   build-argocd:
     runs-on: ubuntu-latest
     steps:
@@ -112,7 +92,6 @@ jobs:
       - build-git-workflows
       - build-maven
       - build-slack-notification
-      - build-day-2-setup-generator
       - build-argocd
     steps:
       - name: Notify Slack channel on failure
