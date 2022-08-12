@@ -1,0 +1,35 @@
+apiVersion: argoproj.io/v1alpha1
+kind: WorkflowTemplate
+metadata:
+  name: mega-deploy-workflow-template
+  namespace: mega-cicd
+spec:
+  volumes:
+    - name: pipeline-secrets
+      secret:
+        secretName: workflow-mega-backend
+        defaultMode: 0600
+  templates:
+    - name: deploy
+      dag:
+        tasks:
+          - name: deploy
+            arguments: {}
+            templateRef:
+              name: deploy-operations
+              template: deploy-from-to
+              clusterScope: true
+  entrypoint: deploy
+  arguments:
+    parameters:
+      - name: source
+        value: comes-from-caller
+      - name: target
+        value: comes-from-caller
+      - name: project
+        value: comes-from-caller
+      - name: repository
+        value: "git@github.com:gepaplexx-demos/mega-backend.git"
+  serviceAccountName: operate-workflow-sa
+  ttlStrategy:
+    secondsAfterCompletion: 3600
