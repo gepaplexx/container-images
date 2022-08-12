@@ -67,26 +67,26 @@ jobs:
           directory: slack-notifications
           addLatest: true
           tags: ${{ steps.source-version.outputs.version }},latest
-  build-argocd:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-        name: checkout
-      - name: source-version
-        id: source-version
-        run: |
-          echo "::set-output name=version::$(cat argocd/version)"
-      - uses: mr-smithers-excellent/docker-build-push@v5
-        name: push-container-image
-        with:
-          image: argocd
-          registry: ghcr.io
-          username: ${{ github.repository }}
-          password: ${{ secrets.GHCR_TOKEN }}
-          dockerfile: argocd/Containerfile
-          directory: argocd
-          addLatest: true
-          tags: ${{ steps.source-version.outputs.version }},latest
+#  build-argocd:
+#    runs-on: ubuntu-latest
+#    steps:
+#      - uses: actions/checkout@v2
+#        name: checkout
+#      - name: source-version
+#        id: source-version
+#        run: |
+#          echo "::set-output name=version::$(cat argocd/version)"
+#      - uses: mr-smithers-excellent/docker-build-push@v5
+#        name: push-container-image
+#        with:
+#          image: argocd
+#          registry: ghcr.io
+#          username: ${{ github.repository }}
+#          password: ${{ secrets.GHCR_TOKEN }}
+#          dockerfile: argocd/Containerfile
+#          directory: argocd
+#          addLatest: true
+#          tags: ${{ steps.source-version.outputs.version }},latest
   build-newman:
     runs-on: ubuntu-latest
     steps:
@@ -115,7 +115,7 @@ jobs:
       - build-git-workflows
       - build-maven
       - build-slack-notification
-      - build-argocd
+#      - build-argocd
       - build-newman
     steps:
       - name: Notify Slack channel on failure
