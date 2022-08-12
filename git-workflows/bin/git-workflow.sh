@@ -21,6 +21,8 @@ COMMIT_HASH=""
 CI_REPOSITORY_SUFFIX="ci"
 IMAGE_TAG_LOCATION=""
 DEFAULT_IMAGE_TAG_LOCATION=true
+DEPLOY_FROM_BRANCH=""
+DEPLOY_TO_BRANCH=""
 
 ######################### print usage #################
 
@@ -35,7 +37,7 @@ Options:
     p | path:                   directory of workspace
     n | name:                   name of the git repository
     t | tag:                    allows override of image tag for argo update. Default: commit-hash
-    - | image-tag-location:        allows to override the path to the image tag in application.yaml. Default: .image.tag
+    - | image-tag-location:     allows to override the path to the image tag in application.yaml. Default: .image.tag
     - | namespace:              namespace for argocd application update
     - | extract:                saves the commit hash as output to be used as image tag
     - | argo-update:            update existing argocd application
@@ -130,11 +132,6 @@ update_namespace() {
   cp "${WORKSPACE}/${REPO_NAME}/application.yaml" "${WORKSPACE}/application.yaml"
 }
 
-extract_vars() {
-  yq e '.metadata.name' application.yaml > ${WORKSPACE}/application
-  yq e '.spec.destination.namespace' application.yaml > ${WORKSPACE}/namespace
-}
-
 delete_branch() {
   echo "--- DELETE BRANCH ---"
   if [ "${BRANCH}" == "main" ] || [ "${BRANCH}" == "master" ]; then
@@ -150,10 +147,30 @@ delete_branch() {
   git push origin :${BRANCH}
 }
 
+deploy_from_to() {
+  echo "--- DEPLOY VERSION FROM $DEPLOY_FROM_BRANCH to $DEPLOY_TO_BRANCH ---"
+  cd "${WORKSPACE}/${REPO_NAME}" || exit 1
+  git remote set-branches origin '*'
+  git fetch
+  git checkout ${DEPLOY_FROM_BRANCH} || exit 1  # source ausgecheckt
+  export IMAGE_TAG_LOCATION
+  export VERSION=$(yq -r "${IMAGE_TAG_LOCATION}" values.yaml)
+  echo $VERSION
+  git checkout ${DEPLOY_TO_BRANCH} || exit 1
+  yq -i "${IMAGE_TAG_LOCATION} = env(COMMIT_HASH)" values.yaml
+  yq -i "${IMAGE_TAG_LOCATION} style=\"double\"" values.yaml
+  git config --global user.name "argo-ci"
+  git config --global user.email "argo-ci@gepardec.com"
+  git add .
+  git commit -m "updated image version to tag ${COMMIT_HASH}" || true
+  git push
+
+}
+
 ######################   handle options ###################
 
 handle_options() {
-local opts=$(getopt -o cu:b:p:n:t: -l argo-update,clone,url:,branch:,path:,name:,extract,tag:,argo-create,namespace:,argo-delete,image-tag-location: -- "$@")
+local opts=$(getopt -o cu:b:p:n:t: -l argo-update,clone,url:,branch:,path:,name:,extract,tag:,argo-create,namespace:,argo-delete,image-tag-location:,from-branch:,to-branch: -- "$@")
 local opts_return=$?
 
 if [[ ${opts_return} != 0 ]]; then
@@ -216,6 +233,14 @@ while true ; do
       DEFAULT_IMAGE_TAG_LOCATION=false
       shift 2
       ;;
+    --from-branch)
+      DEPLOY_FROM_BRANCH="${2}"
+      shift 2
+      ;;
+    --to-branch)
+      DEPLOY_TO_BRANCH="${2}"
+      shift 2
+      ;;
     *)
       break
       ;;
@@ -231,6 +256,12 @@ main() {
   echo "$*"
   handle_options "$@"
 
+  if [ -n "${DEPLOY_FROM_BRANCH}" ] && [ -n "${DEPLOY_FROM_BRANCH}" ]; then
+    update_vars
+    git_clone
+    deploy_from_to
+    exit 0
+  fi
   if [ "${CREATE_ARGO}" == true ]; then
     update_vars
     git_clone
@@ -250,7 +281,6 @@ main() {
     git_clone
     git_checkout
     update_version
-    extract_vars
     exit 0
   fi
   if [ "${DO_CLONE}" == true ]; then
