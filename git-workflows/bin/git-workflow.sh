@@ -154,10 +154,9 @@ deploy_from_to() {
   git fetch
   git checkout ${DEPLOY_FROM_BRANCH} || exit 1  # source ausgecheckt
   export IMAGE_TAG_LOCATION
-  export VERSION=$(yq -r "${IMAGE_TAG_LOCATION}" values.yaml)
-  echo $VERSION
+  export VERSION=$(yq ".${IMAGE_TAG_LOCATION}" values.yaml)
   git checkout ${DEPLOY_TO_BRANCH} || exit 1
-  yq -i "${IMAGE_TAG_LOCATION} = env(COMMIT_HASH)" values.yaml
+  yq -i "${IMAGE_TAG_LOCATION} = env(VERSION)" values.yaml
   yq -i "${IMAGE_TAG_LOCATION} style=\"double\"" values.yaml
   git config --global user.name "argo-ci"
   git config --global user.email "argo-ci@gepardec.com"
