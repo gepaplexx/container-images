@@ -255,7 +255,7 @@ main() {
   echo "$*"
   handle_options "$@"
 
-  if [ -n "${DEPLOY_FROM_BRANCH}" ] && [ -n "${DEPLOY_FROM_BRANCH}" ]; then
+  if [ -n "${DEPLOY_FROM_BRANCH}" ] && [ -n "${DEPLOY_TO_BRANCH}" ]; then
     update_vars
     git_clone
     deploy_from_to
