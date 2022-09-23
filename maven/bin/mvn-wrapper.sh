@@ -12,7 +12,7 @@ main(){
     SETTINGS_STRING="-s /usr/share/maven/conf/settings.xml"
   fi
   echo "mvn $* $SETTINGS_STRING"
-  bash -c "mvn $* ${SETTINGS_STRING} -fae"
+  bash -c "mvn $* ${SETTINGS_STRING} -fae -C"
 }
 
 main "$*"
