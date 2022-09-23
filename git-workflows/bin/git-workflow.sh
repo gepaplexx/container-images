@@ -10,9 +10,11 @@ HOME=/root
 DO_CLONE=false
 DO_CHECKOUT=false
 UPDATE_ARGO=false
+UPDATE_ARGO_MULTIDIR=false
 DELETE_ARGO=false
 CREATE_ARGO=false
 BRANCH="main"
+ENVIRONMENT="main"
 NAMESPACE=""
 CLONE_URL=""
 REPO_NAME="sources"
@@ -23,7 +25,6 @@ IMAGE_TAG_LOCATION=""
 DEFAULT_IMAGE_TAG_LOCATION=true
 DEPLOY_FROM_BRANCH=""
 DEPLOY_TO_BRANCH=""
-
 ######################### print usage #################
 
 print_usage(){
@@ -40,7 +41,8 @@ Options:
     - | image-tag-location:     allows to override the path to the image tag in application.yaml. Default: .image.tag
     - | namespace:              namespace for argocd application update
     - | extract:                saves the commit hash as output to be used as image tag
-    - | argo-update:            update existing argocd application
+    - | argo-update:            update existing argocd application (multibranch)
+    - | argo-update-multidir:   update existing argocd application (multidirectory)
     - | argo-create:            create a new argocd application in $namespace
     - | argo-delete:            deletes the corresponding $branch in infrastructure repository
 
@@ -95,8 +97,8 @@ update_vars() {
   REPO_NAME="${REPO_NAME}-${CI_REPOSITORY_SUFFIX}"
 }
 
-update_version() {
-  echo "--- UPDATE VERSION ---"
+update_version_multibranch() {
+  echo "--- UPDATE VERSION (multibranch) ---"
   export COMMIT_HASH
   export IMAGE_TAG_LOCATION
   cd "${WORKSPACE}/${REPO_NAME}" || exit 1
@@ -108,6 +110,22 @@ update_version() {
   git commit -m "updated image version to tag ${COMMIT_HASH}" || true
   git push
 }
+
+update_version_multidir() {
+  echo "--- UPDATE VERSION (multidir) ---"
+  export COMMIT_HASH
+  export IMAGE_TAG_LOCATION
+  cd "${WORKSPACE}/${REPO_NAME}" || exit 1
+  cd "${ENVIRONMENT}" || exit 1
+  yq -i "${IMAGE_TAG_LOCATION} = env(COMMIT_HASH)" values.yaml
+  yq -i "${IMAGE_TAG_LOCATION} style=\"double\"" values.yaml
+  git config --global user.name "argo-ci"
+  git config --global user.email "argo-ci@gepardec.com"
+  git add .
+  git commit -m "updated image version to tag ${COMMIT_HASH}" || true
+  git push
+}
+
 yq_update_application() {
   echo "--- YQ UPDATE APPLICATION ---"
   export REPO_NAME
@@ -169,7 +187,7 @@ deploy_from_to() {
 ######################   handle options ###################
 
 handle_options() {
-local opts=$(getopt -o cu:b:p:n:t: -l argo-update,clone,url:,branch:,path:,name:,extract,tag:,argo-create,namespace:,argo-delete,image-tag-location:,from-branch:,to-branch: -- "$@")
+local opts=$(getopt -o cu:b:p:n:t: -l argo-update,argo-update-multidir,clone,url:,branch:,path:,name:,extract,tag:,argo-create,namespace:,argo-delete,image-tag-location:,from-branch:,to-branch: -- "$@")
 local opts_return=$?
 
 if [[ ${opts_return} != 0 ]]; then
@@ -213,6 +231,10 @@ while true ; do
       ;;
     --argo-update)
       UPDATE_ARGO=true
+      shift 1
+      ;;
+    --argo-update-multidir)
+      UPDATE_ARGO_MULTIDIR=true
       shift 1
       ;;
     --argo-create)
@@ -279,7 +301,16 @@ main() {
     update_vars
     git_clone
     git_checkout
-    update_version
+    update_version_multibranch
+    exit 0
+  fi
+  if [ "${UPDATE_ARGO_MULTIDIR}" == true ]; then
+    ENVIRONMENT = BRANCH
+    BRANCH = "main"
+    update_vars
+    git_clone
+    git_checkout
+    update_version_multibranch
     exit 0
   fi
   if [ "${DO_CLONE}" == true ]; then
