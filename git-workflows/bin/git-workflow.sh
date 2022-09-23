@@ -116,7 +116,7 @@ update_version_multidir() {
   export COMMIT_HASH
   export IMAGE_TAG_LOCATION
   cd "${WORKSPACE}/${REPO_NAME}" || exit 1
-  cd "${ENVIRONMENT}" || exit 1
+  cd "apps/env/${ENVIRONMENT}" || exit 1
   yq -i "${IMAGE_TAG_LOCATION} = env(COMMIT_HASH)" values.yaml
   yq -i "${IMAGE_TAG_LOCATION} style=\"double\"" values.yaml
   git config --global user.name "argo-ci"
@@ -305,8 +305,8 @@ main() {
     exit 0
   fi
   if [ "${UPDATE_ARGO_MULTIDIR}" == true ]; then
-    ENVIRONMENT = BRANCH
-    BRANCH = "main"
+    ENVIRONMENT=${BRANCH}
+    BRANCH="main"
     update_vars
     git_clone
     git_checkout
