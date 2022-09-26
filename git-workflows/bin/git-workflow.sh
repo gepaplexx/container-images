@@ -116,9 +116,21 @@ update_version_multidir() {
   export COMMIT_HASH
   export IMAGE_TAG_LOCATION
   cd "${WORKSPACE}/${REPO_NAME}" || exit 1
-  cd "apps/env/${ENVIRONMENT}" || exit 1
-  yq -i "${IMAGE_TAG_LOCATION} = env(COMMIT_HASH)" values.yaml
-  yq -i "${IMAGE_TAG_LOCATION} style=\"double\"" values.yaml
+  if [ $ENVIRONMENT == "main" ]
+  then
+    # Merge to main => Updated all envs except feature branches
+    for env in $(find . -not -name "*feature*" -d -depth 1)
+    do
+      yq -i "${IMAGE_TAG_LOCATION} = env(COMMIT_HASH)" "$env/values.yaml"
+      yq -i "${IMAGE_TAG_LOCATION} style=\"double\"" "$env/values.yaml"
+    done
+  elif
+    # Update feature branches, etc.
+    cd "apps/env/${ENVIRONMENT}" || exit 1
+    yq -i "${IMAGE_TAG_LOCATION} = env(COMMIT_HASH)" values.yaml
+    yq -i "${IMAGE_TAG_LOCATION} style=\"double\"" values.yaml
+  fi
+
   git config --global user.name "argo-ci"
   git config --global user.email "argo-ci@gepardec.com"
   git add .
