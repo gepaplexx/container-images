@@ -115,7 +115,8 @@ update_version_multidir() {
   echo "--- UPDATE VERSION (multidir) ---"
   export COMMIT_HASH
   export IMAGE_TAG_LOCATION
-  cd "${WORKSPACE}/${REPO_NAME}" || exit 1
+  cd "${WORKSPACE}/${REPO_NAME}/apps/env" || exit 1
+
   if [ $ENVIRONMENT == "main" ]
   then
     # Merge to main => Updated all envs except feature branches
@@ -124,9 +125,9 @@ update_version_multidir() {
       yq -i "${IMAGE_TAG_LOCATION} = env(COMMIT_HASH)" "$env/values.yaml"
       yq -i "${IMAGE_TAG_LOCATION} style=\"double\"" "$env/values.yaml"
     done
-  elif
+  else
     # Update feature branches, etc.
-    cd "apps/env/${ENVIRONMENT}" || exit 1
+    cd "${ENVIRONMENT}" || exit 1
     yq -i "${IMAGE_TAG_LOCATION} = env(COMMIT_HASH)" values.yaml
     yq -i "${IMAGE_TAG_LOCATION} style=\"double\"" values.yaml
   fi
