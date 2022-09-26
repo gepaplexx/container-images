@@ -310,7 +310,7 @@ main() {
     update_vars
     git_clone
     git_checkout
-    update_version_multibranch
+    update_version_multidir
     exit 0
   fi
   if [ "${DO_CLONE}" == true ]; then
