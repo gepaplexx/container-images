@@ -120,7 +120,7 @@ update_version_multidir() {
   if [ $ENVIRONMENT == "main" ]
   then
     # Merge to main => Updated all envs except feature branches
-    for env in $(find . -not -name "*feature*" -d -depth 1)
+    for env in $(find . -mindepth 1 -maxdepth 1 -type d -not -name "*feature*")
     do
       yq -i "${IMAGE_TAG_LOCATION} = env(COMMIT_HASH)" "$env/values.yaml"
       yq -i "${IMAGE_TAG_LOCATION} style=\"double\"" "$env/values.yaml"
