@@ -69,10 +69,10 @@ log() {
 changedirOrExit() {
   TARGET=$1
   log "switch to dir '$TARGET'"
-  MSG=$(cd $TARGET 2>&1)
+  cd $TARGET
   ERR=$?
   if [ $ERR -ne 0 ]; then
-    log "$MSG"
+    log "cannot switch into dir '$TARGET'"
     exit 1
   fi
 }
@@ -96,7 +96,7 @@ git_clone() {
       exit 1
   fi
   log "cloning '$CLONE_URL' into '${WORKSPACE}/${REPO_NAME}"
-  git clone --depth 1 --recurse-submodules --shallow-submodules "${CLONE_URL}" "${WORKSPACE}"/"${REPO_NAME}" | formatOutput
+  git clone --depth 1 --recurse-submodules --shallow-submodules "${CLONE_URL}" "${WORKSPACE}"/"${REPO_NAME}" 2>&1 | formatOutput
 
 }
 
