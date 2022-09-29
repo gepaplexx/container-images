@@ -25,7 +25,6 @@ IMAGE_TAG_LOCATION=""
 DEFAULT_IMAGE_TAG_LOCATION=true
 DEPLOY_FROM_BRANCH=""
 DEPLOY_TO_BRANCH=""
-LOG_FORMAT="%s [%s] %s\n"
 ######################### print usage #################
 
 print_usage(){
@@ -63,13 +62,13 @@ formatOutput() {
 }
 
 log() {
-  printf "$LOG_FORMAT" "$(date)" "git-workflows" "$1"
+  printf "%s [git-workflows] %s\n" "$(date '+%Y-%m-%d %T')" "$1"
 }
 
 changedirOrExit() {
   TARGET=$1
   log "switch to dir '$TARGET'"
-  cd $TARGET
+  cd "$TARGET"
   ERR=$?
   if [ $ERR -ne 0 ]; then
     log "cannot switch into dir '$TARGET'"
@@ -78,7 +77,7 @@ changedirOrExit() {
 }
 
 checkoutOrExit() {
-  MSG=$(git checkout $1 &>&1)
+  MSG=$(git checkout "$1" &>&1)
   ERR=$?
   log "$MSG"
   [ $ERR -ne 0 ] && exit 1
@@ -232,10 +231,10 @@ deploy_from_to() {
   changedirOrExit "${WORKSPACE}/${REPO_NAME}"
   git remote set-branches origin '*'
   git fetch
-  checkoutOrExit ${DEPLOY_FROM_BRANCH} # source ausgecheckt
+  checkoutOrExit "${DEPLOY_FROM_BRANCH}" # source ausgecheckt
   export IMAGE_TAG_LOCATION
   export VERSION=$(yq "${IMAGE_TAG_LOCATION}" values.yaml)
-  checkoutOrExit ${DEPLOY_TO_BRANCH}
+  checkoutOrExit "${DEPLOY_TO_BRANCH}"
   log "replace ${IMAGE_TAG_LOCATION} = $VERSION in $(pwd)/values.yaml"
   yq -i "${IMAGE_TAG_LOCATION} = env(VERSION)" values.yaml
   yq -i "${IMAGE_TAG_LOCATION} style=\"double\"" values.yaml
