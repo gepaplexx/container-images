@@ -80,7 +80,7 @@ changedirOrExit() {
 
 checkoutOrExit() {
   set +e
-  MSG=$(git checkout "$1" &>&1)
+  MSG=$(git checkout "$1" 2>&1)
   ERR=$?
   log "$MSG"
   [ $ERR -ne 0 ] && exit 1
