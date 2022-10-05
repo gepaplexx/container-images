@@ -66,6 +66,7 @@ log() {
 }
 
 changedirOrExit() {
+  set +e
   TARGET=$1
   log "switch to dir '$TARGET'"
   cd "$TARGET"
@@ -74,13 +75,16 @@ changedirOrExit() {
     log "cannot switch into dir '$TARGET'"
     exit 1
   fi
+  set -e
 }
 
 checkoutOrExit() {
+  set +e
   MSG=$(git checkout "$1" &>&1)
   ERR=$?
   log "$MSG"
   [ $ERR -ne 0 ] && exit 1
+  set -e
 }
 
 ####################### checkout ##################
