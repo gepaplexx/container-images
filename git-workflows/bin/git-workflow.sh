@@ -54,40 +54,83 @@ Function:
 EOF
 }
 
+####################### helper ###################
+formatOutput() {
+  while IFS= read -r line; do
+    log "$line"
+  done
+}
+
+log() {
+  printf "%s [git-workflows] %s\n" "$(date '+%Y-%m-%d %T')" "$1"
+}
+
+changedirOrExit() {
+  set +e
+  TARGET=$1
+  log "switch to dir '$TARGET'"
+  cd "$TARGET"
+  ERR=$?
+  if [ $ERR -ne 0 ]; then
+    log "cannot switch into dir '$TARGET'"
+    exit 1
+  fi
+  set -e
+}
+
+checkoutOrExit() {
+  set +e
+  MSG=$(git checkout "$1" &>&1)
+  ERR=$?
+  log "$MSG"
+  [ $ERR -ne 0 ] && exit 1
+  set -e
+}
+
 ####################### checkout ##################
 
 # TODO: handle private repositories (https://stackoverflow.com/questions/2505096/clone-a-private-repository-github)
 
 git_clone() {
-  echo "--- GIT CLONE ---"
+  log "--- GIT CLONE ---"
   if [ -z "${CLONE_URL}" ]; then
-      echo "missing parameters: url"
+      log "missing parameters: url"
       print_usage
       exit 1
   fi
-  git clone --depth 1 --recurse-submodules --shallow-submodules "${CLONE_URL}" "${WORKSPACE}"/"${REPO_NAME}"
+  log "cloning '$CLONE_URL' into '${WORKSPACE}/${REPO_NAME}"
+  git clone --depth 1 --recurse-submodules --shallow-submodules "${CLONE_URL}" "${WORKSPACE}"/"${REPO_NAME}" 2>&1 | formatOutput
 
 }
 
 git_checkout() {
-  echo "--- GIT CHECKOUT ---"
-  cd "${WORKSPACE}/${REPO_NAME}" || exit 1
-  git remote set-branches origin '*'
-  git fetch
-  git checkout ${BRANCH} || git checkout -b ${BRANCH}
+  log "--- GIT CHECKOUT ---"
+  changedirOrExit "${WORKSPACE}/${REPO_NAME}"
+  git remote set-branches origin '*' | formatOutput
+  git fetch | formatOutput
+  log "checkout branch '${BRANCH}'"
+  MSG=$(git checkout ${BRANCH} 2>&1)
+  ERR=$?
+  log "$MSG"
+  if [ $ERR -ne 0 ]; then
+      log "create new branch '${BRANCH}'"
+      git checkout -b ${BRANCH} 2>&1 | formatOutput
+  fi
   cd || exit 1
 }
 
 extract_git_commit() {
-  echo "--- EXTRACT TAG ---"
-  cd "${WORKSPACE}/${REPO_NAME}" || exit 1
+  log "--- EXTRACT TAG ---"
+  changedirOrExit "${WORKSPACE}/${REPO_NAME}"
   COMMIT_HASH=$(git rev-parse --short HEAD)
+  log "commit hash='${COMMIT_HASH}'"
   cd || exit 1
+  log "write commit hash to '${WORKSPACE}/commit_hash'"
   echo "${COMMIT_HASH}" > "${WORKSPACE}/commit_hash"
 }
 
 update_vars() {
-  echo "--- UPDATE VARS ---"
+  log "--- UPDATE VARS ---"
 
   if [[ ${DEFAULT_IMAGE_TAG_LOCATION} ]]; then
     IMAGE_TAG_LOCATION=".${REPO_NAME}.image.tag"
@@ -95,39 +138,44 @@ update_vars() {
 
   CLONE_URL="${CLONE_URL%.git}-${CI_REPOSITORY_SUFFIX}.git"
   REPO_NAME="${REPO_NAME}-${CI_REPOSITORY_SUFFIX}"
+  log "IMAGE_TAG_LOCATION='${IMAGE_TAG_LOCATION}'; CLONE_URL='${CLONE_URL}'; REPO_NAME='${REPO_NAME}'"
 }
 
 update_version_multibranch() {
-  echo "--- UPDATE VERSION (multibranch) ---"
+  log "--- UPDATE VERSION (multibranch) ---"
   export COMMIT_HASH
   export IMAGE_TAG_LOCATION
-  cd "${WORKSPACE}/${REPO_NAME}" || exit 1
+  changedirOrExit "${WORKSPACE}/${REPO_NAME}"
+  log "update image tag: ${IMAGE_TAG_LOCATION} = ${COMMIT_HASH}"
   yq -i "${IMAGE_TAG_LOCATION} = env(COMMIT_HASH)" values.yaml
   yq -i "${IMAGE_TAG_LOCATION} style=\"double\"" values.yaml
   git config --global user.name "argo-ci"
   git config --global user.email "argo-ci@gepardec.com"
   git add .
-  git commit -m "updated image version to tag ${COMMIT_HASH}" || true
-  git push
+  git commit -m "updated image version to tag ${COMMIT_HASH}" 2>&1 | formatOutput
+  git push 2>&1 | formatOutput
 }
 
 update_version_multidir() {
-  echo "--- UPDATE VERSION (multidir) ---"
+  log "--- UPDATE VERSION (multidir) ---"
   export COMMIT_HASH
   export IMAGE_TAG_LOCATION
-  cd "${WORKSPACE}/${REPO_NAME}/apps/env" || exit 1
+  changedirOrExit "${WORKSPACE}/${REPO_NAME}/apps/env"
 
+  log "update image tag: ${IMAGE_TAG_LOCATION} = ${COMMIT_HASH}"
   if [ $ENVIRONMENT == "main" ]
   then
-    # Merge to main => Updated all envs except feature branches
+    log "merge to main => update all envs except feature branches"
     for env in $(find . -mindepth 1 -maxdepth 1 -type d -not -name "*feature*")
     do
+      log "updating values.yaml in directory '${env}'"
       yq -i "${IMAGE_TAG_LOCATION} = env(COMMIT_HASH)" "$env/values.yaml"
       yq -i "${IMAGE_TAG_LOCATION} style=\"double\"" "$env/values.yaml"
     done
   else
     # Update feature branches, etc.
-    cd "${ENVIRONMENT}" || exit 1
+    log "feature branch update => update values.yaml in directory ${ENVIRONMENT}"
+    changedirOrExit "${ENVIRONMENT}"
     yq -i "${IMAGE_TAG_LOCATION} = env(COMMIT_HASH)" values.yaml
     yq -i "${IMAGE_TAG_LOCATION} style=\"double\"" values.yaml
   fi
@@ -135,65 +183,70 @@ update_version_multidir() {
   git config --global user.name "argo-ci"
   git config --global user.email "argo-ci@gepardec.com"
   git add .
-  git commit -m "updated image version to tag ${COMMIT_HASH}" || true
-  git push
+  git commit -m "updated image version to tag ${COMMIT_HASH}" 2>&1 | formatOutput
+  git push 2>&1 | formatOutput
 }
 
 yq_update_application() {
-  echo "--- YQ UPDATE APPLICATION ---"
+  log "--- YQ UPDATE APPLICATION ---"
   export REPO_NAME
   export NAMESPACE
   export BRANCH
   export NAME=${REPO_NAME%-${CI_REPOSITORY_SUFFIX}}-${NAMESPACE}
 
+  log "updating .metadata.name to ${NAME} in $(pwd)/application.yaml}"
+  log "updating .spec.destination.namespace to ${NAME} in $(pwd)/application.yaml}"
+  log "updating .spec.source.targetRevision to ${BRANCH} in $(pwd)/application.yaml}"
   yq -i '.metadata.name = env(NAME) | .spec.destination.namespace = env(NAME) | .spec.source.targetRevision = env(BRANCH)' application.yaml
 }
 
 update_namespace() {
-  echo "--- UPDATE NAMESPACE ---"
-  cd "${WORKSPACE}/${REPO_NAME}" || exit 1
+  log "--- UPDATE NAMESPACE ---"
+  changedirOrExit "${WORKSPACE}/${REPO_NAME}"
   yq_update_application
   git config --global user.name "argo-ci"
   git config --global user.email "argo-ci@gepardec.com"
   git add .
-  git commit -m "created branch ${BRANCH} and updated application.yaml" || true
-  git push --set-upstream origin "${BRANCH}"
-  echo "WORKSPACE: ${WORKSPACE}"
-  echo "REPONAME: ${REPO_NAME}"
+  git commit -m "created branch ${BRANCH} and updated application.yaml" 2>&1 | formatOutput
+  git push --set-upstream origin "${BRANCH}" 2>&1 | formatOutput
+  log "WORKSPACE: ${WORKSPACE}; REPONAME: ${REPO_NAME}"
+  log "copy '${WORKSPACE}/${REPO_NAME}/application.yaml' to '${WORKSPACE}/application.yaml'"
   cp "${WORKSPACE}/${REPO_NAME}/application.yaml" "${WORKSPACE}/application.yaml"
 }
 
 delete_branch() {
-  echo "--- DELETE BRANCH ---"
+  log "--- DELETE BRANCH ---"
   if [ "${BRANCH}" == "main" ] || [ "${BRANCH}" == "master" ]; then
-    echo "Not allowed to delete main/master branch"
+    log "Not allowed to delete main/master branch"
     exit 1
   fi
-  cd "${WORKSPACE}/${REPO_NAME}"  || exit 1
-  cp "${WORKSPACE}"/"${REPO_NAME}"/application.yaml "${WORKSPACE}"/application.yaml
-  git checkout main
-  git branch -D ${BRANCH}
+  changedirOrExit "${WORKSPACE}/${REPO_NAME}"
+  log "copy '${WORKSPACE}/${REPO_NAME}/application.yaml' to '${WORKSPACE}/application.yaml'"
+  cp "${WORKSPACE}/${REPO_NAME}/application.yaml" "${WORKSPACE}/application.yaml"
+  git checkout main 2>&1 | formatOutput
+  git branch -D ${BRANCH} 2>&1 | formatOutput
   git config --global user.name "argo-ci"
   git config --global user.email "argo-ci@gepardec.com"
-  git push origin :${BRANCH}
+  git push origin :${BRANCH} 2>&1 | formatOutput
 }
 
 deploy_from_to() {
-  echo "--- DEPLOY VERSION FROM $DEPLOY_FROM_BRANCH to $DEPLOY_TO_BRANCH ---"
-  cd "${WORKSPACE}/${REPO_NAME}" || exit 1
+  log "--- DEPLOY VERSION FROM $DEPLOY_FROM_BRANCH to $DEPLOY_TO_BRANCH ---"
+  changedirOrExit "${WORKSPACE}/${REPO_NAME}"
   git remote set-branches origin '*'
   git fetch
-  git checkout ${DEPLOY_FROM_BRANCH} || exit 1  # source ausgecheckt
+  checkoutOrExit "${DEPLOY_FROM_BRANCH}" # source ausgecheckt
   export IMAGE_TAG_LOCATION
   export VERSION=$(yq "${IMAGE_TAG_LOCATION}" values.yaml)
-  git checkout ${DEPLOY_TO_BRANCH} || exit 1
+  checkoutOrExit "${DEPLOY_TO_BRANCH}"
+  log "replace ${IMAGE_TAG_LOCATION} = $VERSION in $(pwd)/values.yaml"
   yq -i "${IMAGE_TAG_LOCATION} = env(VERSION)" values.yaml
   yq -i "${IMAGE_TAG_LOCATION} style=\"double\"" values.yaml
   git config --global user.name "argo-ci"
   git config --global user.email "argo-ci@gepardec.com"
   git add .
-  git commit -m "updated image version to tag ${COMMIT_HASH}" || true
-  git push
+  git commit -m "updated image version to tag ${COMMIT_HASH}" 2>&1 | formatOutput
+  git push 2>&1 | formatOutput
 
 }
 
@@ -283,11 +336,10 @@ done
 
 }
 
-
 ######################   MAIN ####################
 
 main() {
-  echo "$*"
+  log "$*"
   handle_options "$@"
 
   if [ -n "${DEPLOY_FROM_BRANCH}" ] && [ -n "${DEPLOY_TO_BRANCH}" ]; then
