@@ -12,7 +12,9 @@ DO_CHECKOUT=false
 UPDATE_ARGO=false
 UPDATE_ARGO_MULTIDIR=false
 DELETE_ARGO=false
+DELETE_ARGO_MULTIDIR=false
 CREATE_ARGO=false
+CREATE_ARGO_MULTIDIR=false
 BRANCH="main"
 ENVIRONMENT="main"
 NAMESPACE=""
@@ -43,8 +45,10 @@ Options:
     - | extract:                saves the commit hash as output to be used as image tag
     - | argo-update:            update existing argocd application (multibranch)
     - | argo-update-multidir:   update existing argocd application (multidirectory)
-    - | argo-create:            create a new argocd application in $namespace
-    - | argo-delete:            deletes the corresponding $branch in infrastructure repository
+    - | argo-create:            create a new argocd application in $namespace (multibranch)
+    - | argo-create-multidir:   create a new argocd application in $namespace (multidir)
+    - | argo-delete:            deletes the corresponding $branch in infrastructure repository (multibranch)
+    - | argo-delete-multidir:   deletes the corresponding $branch in infrastructure repository (multidir)
 
     h | help: This help
 
@@ -104,6 +108,7 @@ git_clone() {
 }
 
 git_checkout() {
+  set +e
   log "--- GIT CHECKOUT ---"
   changedirOrExit "${WORKSPACE}/${REPO_NAME}"
   git remote set-branches origin '*' | formatOutput
@@ -117,6 +122,7 @@ git_checkout() {
       git checkout -b ${BRANCH} 2>&1 | formatOutput
   fi
   cd || exit 1
+  set -e
 }
 
 extract_git_commit() {
@@ -200,6 +206,19 @@ yq_update_application() {
   yq -i '.metadata.name = env(NAME) | .spec.destination.namespace = env(NAME) | .spec.source.targetRevision = env(BRANCH)' application.yaml
 }
 
+yq_update_application_multidir() {
+  log "--- YQ UPDATE APPLICATION (multidir) ---"
+  export NAMESPACE
+
+  ELEMENT="{\"cluster\": \"${NAMESPACE}\", \"url\": \"https://kubernetes.default.svc\", \"branch\": \"main\"}"
+  log "appending ${ELEMENT} to .spec.generators[0].list.elements in $(pwd)/argocd/applicationset.yaml}"
+  yq -i ".spec.generators[0].list.elements += $ELEMENT" argocd/applicationset.yaml
+
+  export SOURCE_VERSION=$(yq '.spec.generators[0].list.elements | map(select(.branch == "main")) | .[0].cluster' argocd/applicationset.yaml)
+  log "creating directory for new branch: apps/env/${NAMESPACE}, source: apps/env/${SOURCE_VERSION}"
+  cp "apps/env/${SOURCE_VERSION}" "apps/env/${NAMESPACE}"
+}
+
 update_namespace() {
   log "--- UPDATE NAMESPACE ---"
   changedirOrExit "${WORKSPACE}/${REPO_NAME}"
@@ -212,6 +231,20 @@ update_namespace() {
   log "WORKSPACE: ${WORKSPACE}; REPONAME: ${REPO_NAME}"
   log "copy '${WORKSPACE}/${REPO_NAME}/application.yaml' to '${WORKSPACE}/application.yaml'"
   cp "${WORKSPACE}/${REPO_NAME}/application.yaml" "${WORKSPACE}/application.yaml"
+}
+
+update_namespace_multidir() {
+  log "--- UPDATE NAMESPACE (multidir) ---"
+  changedirOrExit "${WORKSPACE}/${REPO_NAME}"
+  yq_update_application_multidir
+  git config --global user.name "argo-ci"
+  git config --global user.email "argo-ci@gepardec.com"
+  git add .
+  git commit -m "new folder '${NAMESPACE}' in apps/env, updated argocd/applicationset.yaml" 2>&1 | formatOutput
+  git push 2>&1 | formatOutput
+  log "WORKSPACE: ${WORKSPACE}; REPONAME: ${REPO_NAME}"
+  log "copy '${WORKSPACE}/${REPO_NAME}/argocd/applicationset.yaml' to '${WORKSPACE}/argocd/application.yaml'"
+  cp "${WORKSPACE}/${REPO_NAME}/argocd/applicationset.yaml" "${WORKSPACE}/application.yaml"
 }
 
 delete_branch() {
@@ -228,6 +261,22 @@ delete_branch() {
   git config --global user.name "argo-ci"
   git config --global user.email "argo-ci@gepardec.com"
   git push origin :${BRANCH} 2>&1 | formatOutput
+}
+
+delete_branch_multidir() {
+  log "--- DELETE BRANCH (multidir)---"
+  git checkout main 2>&1 | formatOutput
+  changedirOrExit "${WORKSPACE}/${REPO_NAME}"
+
+  log "removing ${NAMESPACE} from argocd/applicationset.yaml"
+  yq -i "del(.spec.generators[0].list.elements[] | select(.cluster == \"${NAMESPACE}\"))" argocd/applicationset.yaml
+  log "copy '${WORKSPACE}/${REPO_NAME}/argocd/applicationset.yaml' to '${WORKSPACE}/application.yaml'"
+  cp "${WORKSPACE}/${REPO_NAME}/argocd/applicationset.yaml" "${WORKSPACE}/application.yaml"
+  log "deleting directory ${NAMESPACE} from apps/env"
+  rm -rf "apps/env/${NAMESPACE}"
+  git config --global user.name "argo-ci"
+  git config --global user.email "argo-ci@gepardec.com"
+  git push 2>&1 | formatOutput
 }
 
 deploy_from_to() {
@@ -253,7 +302,7 @@ deploy_from_to() {
 ######################   handle options ###################
 
 handle_options() {
-local opts=$(getopt -o cu:b:p:n:t: -l argo-update,argo-update-multidir,clone,url:,branch:,path:,name:,extract,tag:,argo-create,namespace:,argo-delete,image-tag-location:,from-branch:,to-branch: -- "$@")
+local opts=$(getopt -o cu:b:p:n:t: -l argo-update,argo-update-multidir,clone,url:,branch:,path:,name:,extract,tag:,argo-create,argo-create-multidir,namespace:,argo-delete,argo-delete-multidir,image-tag-location:,from-branch:,to-branch: -- "$@")
 local opts_return=$?
 
 if [[ ${opts_return} != 0 ]]; then
@@ -307,8 +356,16 @@ while true ; do
       CREATE_ARGO=true
       shift 1
       ;;
+    --argo-create-multidir)
+      CREATE_ARGO_MULTIDIR=true
+      shift 1
+      ;;
     --argo-delete)
       DELETE_ARGO=true
+      shift 1
+      ;;
+    --argo-delete-multidir)
+      DELETE_ARGO_MULTIDIR=true
       shift 1
       ;;
     --tag | -t)
@@ -355,11 +412,23 @@ main() {
     update_namespace
     exit 0
   fi
+  if [ "${CREATE_ARGO_MULTIDIR}" == true ]; then
+    update_vars
+    git_clone
+    update_namespace_multidir
+    exit 0
+  fi
   if [ "${DELETE_ARGO}" == true ]; then
     update_vars
     git_clone
     git_checkout
     delete_branch
+    exit 0
+  fi
+  if [ "${DELETE_ARGO_MULTIDIR}" == true ]; then
+    update_vars
+    git_clone
+    delete_branch_multidir
     exit 0
   fi
   if [ "${UPDATE_ARGO}" == true ]; then
