@@ -216,7 +216,7 @@ yq_update_application_multidir() {
 
   export SOURCE_VERSION=$(yq '.spec.generators[0].list.elements | map(select(.branch == "main")) | .[0].cluster' argocd/applicationset.yaml)
   log "creating directory for new branch: apps/env/${NAMESPACE}, source: apps/env/${SOURCE_VERSION}"
-  cp "apps/env/${SOURCE_VERSION}" "apps/env/${NAMESPACE}"
+  cp -r "apps/env/${SOURCE_VERSION}" "apps/env/${NAMESPACE}"
 }
 
 update_namespace() {
