@@ -265,8 +265,8 @@ delete_branch() {
 
 delete_branch_multidir() {
   log "--- DELETE BRANCH (multidir)---"
-  git checkout main 2>&1 | formatOutput
   changedirOrExit "${WORKSPACE}/${REPO_NAME}"
+  git checkout main 2>&1 | formatOutput
 
   log "removing ${NAMESPACE} from argocd/applicationset.yaml"
   yq -i "del(.spec.generators[0].list.elements[] | select(.cluster == \"${NAMESPACE}\"))" argocd/applicationset.yaml
@@ -274,6 +274,9 @@ delete_branch_multidir() {
   cp "${WORKSPACE}/${REPO_NAME}/argocd/applicationset.yaml" "${WORKSPACE}/application.yaml"
   log "deleting directory ${NAMESPACE} from apps/env"
   rm -rf "apps/env/${NAMESPACE}"
+
+  git add .
+  git commit -m "removed folder '${NAMESPACE}' from apps/env, updated argocd/applicationset.yaml" 2>&1 | formatOutput
   git config --global user.name "argo-ci"
   git config --global user.email "argo-ci@gepardec.com"
   git push 2>&1 | formatOutput
