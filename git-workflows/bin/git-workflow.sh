@@ -275,10 +275,10 @@ delete_branch_multidir() {
   log "deleting directory ${NAMESPACE} from apps/env"
   rm -rf "apps/env/${NAMESPACE}"
 
-  git add .
-  git commit -m "removed folder '${NAMESPACE}' from apps/env, updated argocd/applicationset.yaml" 2>&1 | formatOutput
   git config --global user.name "argo-ci"
   git config --global user.email "argo-ci@gepardec.com"
+  git add .
+  git commit -m "removed folder '${NAMESPACE}' from apps/env, updated argocd/applicationset.yaml" 2>&1 | formatOutput
   git push 2>&1 | formatOutput
 }
 
