@@ -317,10 +317,12 @@ deploy_from_to() {
 deploy_from_to_multibranch(){
   log "--- DEPLOY VERSION FROM $DEPLOY_FROM_BRANCH to $DEPLOY_TO_BRANCH multibranch-style---"
   #TODO handle feature-branches
-
+  changedirOrExit "${WORKSPACE}/${REPO_NAME}"
   git remote set-branches origin '*'
-  git fetch
-  git checkout "${DEPLOY_TO_BRANCH}"
+  git fetch --unshallow
+  checkoutOrExit "${DEPLOY_TO_BRANCH}"
+  git config --global user.name "argo-ci"
+  git config --global user.email "argo-ci@gepardec.com"
   git merge "${DEPLOY_FROM_BRANCH}"
   git push 2>&1 | formatOutput
 }
