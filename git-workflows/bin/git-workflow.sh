@@ -185,7 +185,7 @@ update_version_multidir() {
   else
     # Update feature branches, etc.
     log "feature branch update => update values.yaml in directory ${ENVIRONMENT}"
-    changedirOrExit "${ENVIRONMENT}"
+    changedirOrExit "${ENVIRONMENT,,}"
     yq -i "${IMAGE_TAG_LOCATION} = env(COMMIT_HASH)" values.yaml
     yq -i "${IMAGE_TAG_LOCATION} style=\"double\"" values.yaml
   fi
