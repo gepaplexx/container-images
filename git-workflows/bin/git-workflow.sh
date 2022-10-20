@@ -50,9 +50,9 @@ Options:
     - | argo-create-multidir:   create a new argocd application in $namespace (multidir)
     - | argo-delete:            deletes the corresponding $branch in infrastructure repository (multibranch)
     - | argo-delete-multidir:   deletes the corresponding $branch in infrastructure repository (multidir)
-    - | --from-branch:          source branch for deploying from one branch to another
-    - | --to-branch:            target branch for deploying from one branch to another
-    - | --deploy-multibranch:   boolean flag to differentiate multibranch and multidir deployment
+    - | from-branch:          source branch for deploying from one branch to another
+    - | to-branch:            target branch for deploying from one branch to another
+    - | deploy-multidir:   boolean flag to differentiate multibranch and multidir deployment
 
     h | help: This help
 
@@ -403,7 +403,7 @@ while true ; do
       DEPLOY_TO_BRANCH="${2}"
       shift 2
       ;;
-    --deploy-multibranch)
+    --deploy-multidir)
       DEPLOY_MULTIDIR=true
       shift 1
       ;;
