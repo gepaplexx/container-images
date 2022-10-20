@@ -287,6 +287,7 @@ delete_branch_multidir() {
 }
 
 update_deploy_branches() {
+  REPO_NAME=$(echo "$REPO_NAME" | tr -d '"[]')
   DEPLOY_FROM_BRANCH=$(echo "$DEPLOY_FROM_BRANCH" | tr -d '"[]')
   DEPLOY_TO_BRANCH=$(echo "$DEPLOY_TO_BRANCH" | tr -d '"[]')
   log "new source branch: $DEPLOY_FROM_BRANCH"
@@ -428,7 +429,7 @@ main() {
   log "$*"
   handle_options "$@"
 
-  if [ "${DEPLOY_MULTIDIR}" -eq 1 ] && [ -n "${DEPLOY_FROM_BRANCH}" ] && [ -n "${DEPLOY_TO_BRANCH}" ]; then
+  if [ "${DEPLOY_MULTIDIR}" == true ] && [ -n "${DEPLOY_FROM_BRANCH}" ] && [ -n "${DEPLOY_TO_BRANCH}" ]; then
     update_deploy_branches
     update_vars
     git_clone
