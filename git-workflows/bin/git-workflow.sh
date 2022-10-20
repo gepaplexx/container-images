@@ -27,6 +27,7 @@ IMAGE_TAG_LOCATION=""
 DEFAULT_IMAGE_TAG_LOCATION=true
 DEPLOY_FROM_BRANCH=""
 DEPLOY_TO_BRANCH=""
+DEPLOY_MULTIDIR=false
 ######################### print usage #################
 
 print_usage(){
@@ -49,6 +50,9 @@ Options:
     - | argo-create-multidir:   create a new argocd application in $namespace (multidir)
     - | argo-delete:            deletes the corresponding $branch in infrastructure repository (multibranch)
     - | argo-delete-multidir:   deletes the corresponding $branch in infrastructure repository (multidir)
+    - | --from-branch:          source branch for deploying from one branch to another
+    - | --to-branch:            target branch for deploying from one branch to another
+    - | --deploy-multibranch:   boolean flag to differentiate multibranch and multidir deployment
 
     h | help: This help
 
@@ -302,6 +306,17 @@ deploy_from_to() {
 
 }
 
+deploy_from_to_multibranch(){
+  log "--- DEPLOY VERSION FROM $DEPLOY_FROM_BRANCH to $DEPLOY_TO_BRANCH multibranch-style---"
+  #TODO handle feature-branches
+
+  git remote set-branches origin '*'
+  git fetch
+  git checkout "${DEPLOY_TO_BRANCH}"
+  git merge "${DEPLOY_FROM_BRANCH}"
+  git push 2>&1 | formatOutput
+}
+
 ######################   handle options ###################
 
 handle_options() {
@@ -388,6 +403,10 @@ while true ; do
       DEPLOY_TO_BRANCH="${2}"
       shift 2
       ;;
+    --deploy-multibranch)
+      DEPLOY_MULTIDIR=true
+      shift 1
+      ;;
     *)
       break
       ;;
@@ -401,6 +420,13 @@ done
 main() {
   log "$*"
   handle_options "$@"
+
+  if [ "${DEPLOY_MULTIDIR}" -eq 1 ] && [ -n "${DEPLOY_FROM_BRANCH}" ] && [ -n "${DEPLOY_TO_BRANCH}" ]; then
+    update_vars
+    git_clone
+    deploy_from_to_multibranch
+    exit 0
+  fi
 
   if [ -n "${DEPLOY_FROM_BRANCH}" ] && [ -n "${DEPLOY_TO_BRANCH}" ]; then
     update_vars
