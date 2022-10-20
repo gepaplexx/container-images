@@ -320,6 +320,7 @@ deploy_from_to_multibranch(){
   changedirOrExit "${WORKSPACE}/${REPO_NAME}"
   git remote set-branches origin '*'
   git fetch --unshallow
+  checkoutOrExit "${DEPLOY_FROM_BRANCH}"
   checkoutOrExit "${DEPLOY_TO_BRANCH}"
   git config --global user.name "argo-ci"
   git config --global user.email "argo-ci@gepardec.com"
