@@ -286,6 +286,13 @@ delete_branch_multidir() {
   git push 2>&1 | formatOutput
 }
 
+update_deploy_branches() {
+  DEPLOY_FROM_BRANCH=$(echo "$DEPLOY_FROM_BRANCH" | tr -d '"[]')
+  DEPLOY_TO_BRANCH=$(echo "$DEPLOY_TO_BRANCH" | tr -d '"[]')
+  log "new source branch: $DEPLOY_FROM_BRANCH"
+  log "new target branch: $DEPLOY_TO_BRANCH"
+}
+
 deploy_from_to() {
   log "--- DEPLOY VERSION FROM $DEPLOY_FROM_BRANCH to $DEPLOY_TO_BRANCH ---"
   changedirOrExit "${WORKSPACE}/${REPO_NAME}"
@@ -422,6 +429,7 @@ main() {
   handle_options "$@"
 
   if [ "${DEPLOY_MULTIDIR}" -eq 1 ] && [ -n "${DEPLOY_FROM_BRANCH}" ] && [ -n "${DEPLOY_TO_BRANCH}" ]; then
+    update_deploy_branches
     update_vars
     git_clone
     deploy_from_to_multibranch
@@ -429,6 +437,7 @@ main() {
   fi
 
   if [ -n "${DEPLOY_FROM_BRANCH}" ] && [ -n "${DEPLOY_TO_BRANCH}" ]; then
+    update_deploy_branches
     update_vars
     git_clone
     deploy_from_to
