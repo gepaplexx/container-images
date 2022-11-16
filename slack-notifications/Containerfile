@@ -1,4 +1,4 @@
-FROM  ghcr.io/fhochleitner/slack-notify
+FROM  ghcr.io/gepaplexx/slack-notify
 
 COPY bin/entrypoint.sh /entrypoint.sh
 
