@@ -482,7 +482,7 @@ main() {
   fi
   if [ "${UPDATE_ARGO_MULTIDIR}" == true ]; then
     # Replace '/' '_' in branch-name with '-' and use lowercase characters only.
-    ENVIRONMENT=${BRANCH,,}  | sed -e 's/[/_]/-/g'
+    ENVIRONMENT=$(echo ${BRANCH,,} | sed -e 's/[/_]/-/g')
     BRANCH="main"
     update_vars
     git_clone
