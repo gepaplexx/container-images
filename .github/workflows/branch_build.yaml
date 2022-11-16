@@ -19,7 +19,7 @@ jobs:
           image: git-workflows
           registry: ghcr.io
           username: ${{ github.repository }}
-          password: ${{ secrets.PAT }}
+          password: ${{ secrets.GHCR_TOKEN }}
           dockerfile: git-workflows/Containerfile
           directory:  git-workflows
           addLatest: true
@@ -39,7 +39,7 @@ jobs:
           image: maven
           registry: ghcr.io
           username: ${{ github.repository }}
-          password: ${{ secrets.PAT }}
+          password: ${{ secrets.GHCR_TOKEN }}
           dockerfile: maven/Containerfile
           directory: maven
           addLatest: true
@@ -59,7 +59,7 @@ jobs:
           image: slack-notification
           registry: ghcr.io
           username: ${{ github.repository }}
-          password: ${{ secrets.PAT }}
+          password: ${{ secrets.GHCR_TOKEN }}
           dockerfile: slack-notifications/Containerfile
           directory: slack-notifications
           addLatest: true
@@ -79,7 +79,7 @@ jobs:
 #          image: argocd
 #          registry: ghcr.io
 #          username: ${{ github.repository }}
-#          password: ${{ secrets.PAT }}
+#          password: ${{ secrets.GHCR_TOKEN }}
 #          dockerfile: argocd/Containerfile
 #          directory: argocd
 #          addLatest: true

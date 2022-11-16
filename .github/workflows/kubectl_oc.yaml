@@ -18,7 +18,7 @@ jobs:
           image: kubectl-oc-4.9
           registry: ghcr.io
           username: ${{ github.repository }}
-          password: ${{ secrets.PAT }}
+          password: ${{ secrets.GHCR_TOKEN }}
           dockerfile: kubectl-oc/Containerfile
           directory: kubectl-oc
           addLatest: true
@@ -35,7 +35,7 @@ jobs:
           image: kubectl-oc-4.10
           registry: ghcr.io
           username: ${{ github.repository }}
-          password: ${{ secrets.PAT }}
+          password: ${{ secrets.GHCR_TOKEN }}
           dockerfile: kubectl-oc/Containerfile
           directory: kubectl-oc
           addLatest: true
@@ -52,7 +52,7 @@ jobs:
           image: kubectl-oc
           registry: ghcr.io
           username: ${{ github.repository }}
-          password: ${{ secrets.PAT }}
+          password: ${{ secrets.GHCR_TOKEN }}
           dockerfile: kubectl-oc/Containerfile
           directory: kubectl-oc
           addLatest: true
