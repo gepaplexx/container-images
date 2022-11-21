@@ -168,6 +168,7 @@ update_version_multibranch() {
 
 update_version_multidir() {
   log "--- UPDATE VERSION (multidir) ---"
+  log "--- ENVIRONMENT: ${ENVIRONMENT} ---"
   export COMMIT_HASH
   export IMAGE_TAG_LOCATION
   changedirOrExit "${WORKSPACE}/${REPO_NAME}/apps/env"
@@ -482,8 +483,8 @@ main() {
   fi
   if [ "${UPDATE_ARGO_MULTIDIR}" == true ]; then
     # Replace '/' '_' in branch-name with '-' and use lowercase characters only.
-    ENVIRONMENT=$(echo ${BRANCH,,} | sed -e 's/[/_]/-/g')
-    BRANCH="main"
+    export ENVIRONMENT=$(echo ${BRANCH,,} | sed -e 's/[/_]/-/g')
+    export BRANCH="main"
     update_vars
     git_clone
     git_checkout
