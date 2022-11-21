@@ -9,4 +9,6 @@ RUN apk --no-cache add bash jq  \
         && chmod -R g=u /entrypoint.sh \
         && chmod +x /entrypoint.sh
 
+COPY version /etc/version
+
 CMD ["/entrypoint.sh"]

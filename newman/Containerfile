@@ -3,3 +3,5 @@ FROM postman/newman
 RUN npm install -g newman-reporter-htmlextra && \
     npm install -g newman-reporter-json && \
     npm install -g newman-reporter-html
+
+COPY version /etc/version

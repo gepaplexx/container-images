@@ -12,5 +12,6 @@ RUN wget -qO - https://github.com/kubernetes-sigs/kustomize/releases/download/ku
     && wget -qcO - https://github.com/mikefarah/yq/releases/download/v4.23.1/yq_linux_amd64 > /usr/bin/yq \
     && chmod +x /usr/bin/yq
 
+COPY version /etc/version
 # Switch back to non-root user
 USER argocd

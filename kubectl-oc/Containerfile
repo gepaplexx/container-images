@@ -10,6 +10,8 @@ RUN apt update -y && apt install -y wget vim bash \
     && chmod -R +x  /usr/bin/ \
     && chgrp -R 0 /usr/bin/
 
+COPY version /etc/version
+
 ENTRYPOINT ["bash"]
 
 
