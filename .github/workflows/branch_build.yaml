@@ -7,7 +7,7 @@ jobs:
   build-git-workflows:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         name: checkout
       - name: source-version
         id: source-version
@@ -27,7 +27,7 @@ jobs:
   build-maven:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         name: checkout
       - name: source-version
         id: source-version
@@ -47,7 +47,7 @@ jobs:
   build-slack-notification:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         name: checkout
       - name: source-version
         id: source-version
