@@ -333,7 +333,7 @@ deploy_from_to_multibranch(){
 ######################   handle options ###################
 
 handle_options() {
-local opts=$(getopt -o cu:b:p:n:t:h -l argo-update,argo-update-multidir,clone,url:,branch:,path:,name:,extract,tag:,argo-create,argo-create-multidir,namespace:,argo-delete,argo-delete-multidir,image-tag-location:,from-branch:,to-branch:,deploy-multidir:,help -- "$@")
+local opts=$(getopt -o chu:b:p:n:t: -l argo-update,argo-update-multidir,clone,url:,branch:,path:,name:,extract,tag:,argo-create,argo-create-multidir,namespace:,argo-delete,argo-delete-multidir,image-tag-location:,from-branch:,to-branch:,deploy-multidir:,help -- "$@")
 local opts_return=$?
 
 if [[ ${opts_return} != 0 ]]; then
