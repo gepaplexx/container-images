@@ -22,6 +22,8 @@ CLONE_URL=""
 REPO_NAME="sources"
 WORKSPACE="/mnt/out"
 COMMIT_HASH=""
+COMMIT_USER=""
+COMMIT_EMAIL=""
 CI_REPOSITORY_SUFFIX="ci"
 IMAGE_TAG_LOCATION=""
 DEFAULT_IMAGE_TAG_LOCATION=true
@@ -41,6 +43,8 @@ Options:
     p | path:                   directory of workspace
     n | name:                   name of the git repository
     t | tag:                    allows override of image tag for argo update. Default: commit-hash
+    - | commit-user:            allows override of commit user. Default: user of last commit
+    - | commit-email:           allows override of commit email. Default: email of last commit
     - | image-tag-location:     allows to override the path to the image tag in application.yaml. Default: .image.tag
     - | namespace:              namespace for argocd application update
     - | extract:                saves the commit hash as output to be used as image tag
@@ -129,14 +133,22 @@ git_checkout() {
   set -e
 }
 
-extract_git_commit() {
+extract_git_information() {
   log "--- EXTRACT TAG ---"
   changedirOrExit "${WORKSPACE}/${REPO_NAME}"
   COMMIT_HASH=$(git rev-parse --short HEAD)
+  COMMIT_EMAIL=$(git log --format='%ae' --no-merges "${COMMIT_HASH}"^!)
+  COMMIT_USER=$(git log --format='%an' --no-merges "${COMMIT_HASH}"^!)
+  log "commit_user='${COMMIT_USER}'"
+  log "commit_mail='${COMMIT_EMAIL}'"
   log "commit hash='${COMMIT_HASH}'"
   cd || exit 1
   log "write commit hash to '${WORKSPACE}/commit_hash'"
   echo "${COMMIT_HASH}" > "${WORKSPACE}/commit_hash"
+  log "write commit user to '${WORKSPACE}/commit_user'"
+  echo "${COMMIT_USER}" > "${WORKSPACE}/commit_user"
+  log "write commit mail to '${WORKSPACE}/commit_mail'"
+  echo "${COMMIT_EMAIL}" > "${WORKSPACE}/commit_mail"
 }
 
 update_vars() {
@@ -159,8 +171,8 @@ update_version_multibranch() {
   log "update image tag: ${IMAGE_TAG_LOCATION} = ${COMMIT_HASH}"
   yq -i "${IMAGE_TAG_LOCATION} = env(COMMIT_HASH)" values.yaml
   yq -i "${IMAGE_TAG_LOCATION} style=\"double\"" values.yaml
-  git config --global user.name "argo-ci"
-  git config --global user.email "argo-ci@gepardec.com"
+  git config --global user.name "${COMMIT_USER}"
+  git config --global user.email "${COMMIT_EMAIL}"
   git add .
   git commit -m "updated image version to tag ${COMMIT_HASH}" 2>&1 | formatOutput
   git push 2>&1 | formatOutput
@@ -191,8 +203,8 @@ update_version_multidir() {
     yq -i "${IMAGE_TAG_LOCATION} style=\"double\"" values.yaml
   fi
 
-  git config --global user.name "argo-ci"
-  git config --global user.email "argo-ci@gepardec.com"
+  git config --global user.name "${COMMIT_USER}"
+  git config --global user.email "${COMMIT_EMAIL}"
   git add .
   git commit -m "updated image version to tag ${COMMIT_HASH}" 2>&1 | formatOutput
   git push 2>&1 | formatOutput
@@ -228,7 +240,7 @@ update_namespace() {
   log "--- UPDATE NAMESPACE ---"
   changedirOrExit "${WORKSPACE}/${REPO_NAME}"
   yq_update_application
-  git config --global user.name "argo-ci"
+  git config --global user.name "${COMMIT_USER}"
   git config --global user.email "argo-ci@gepardec.com"
   git add .
   git commit -m "created branch ${BRANCH} and updated application.yaml" 2>&1 | formatOutput
@@ -242,7 +254,7 @@ update_namespace_multidir() {
   log "--- UPDATE NAMESPACE (multidir) ---"
   changedirOrExit "${WORKSPACE}/${REPO_NAME}"
   yq_update_application_multidir
-  git config --global user.name "argo-ci"
+  git config --global user.name "${COMMIT_USER}"
   git config --global user.email "argo-ci@gepardec.com"
   git add .
   git commit -m "new folder '${NAMESPACE}' in apps/env, updated argocd/applicationset.yaml" 2>&1 | formatOutput
@@ -263,7 +275,7 @@ delete_branch() {
   cp "${WORKSPACE}/${REPO_NAME}/application.yaml" "${WORKSPACE}/application.yaml"
   git checkout main 2>&1 | formatOutput
   git branch -D ${BRANCH} 2>&1 | formatOutput
-  git config --global user.name "argo-ci"
+  git config --global user.name "${COMMIT_USER}"
   git config --global user.email "argo-ci@gepardec.com"
   git push origin :${BRANCH} 2>&1 | formatOutput
 }
@@ -280,7 +292,7 @@ delete_branch_multidir() {
   log "deleting directory ${NAMESPACE} from apps/env"
   rm -rf "apps/env/${NAMESPACE}"
 
-  git config --global user.name "argo-ci"
+  git config --global user.name "${COMMIT_USER}"
   git config --global user.email "argo-ci@gepardec.com"
   git add .
   git commit -m "removed folder '${NAMESPACE}' from apps/env, updated argocd/applicationset.yaml" 2>&1 | formatOutput
@@ -402,6 +414,14 @@ while true ; do
       COMMIT_HASH="${2}"
       shift 2
       ;;
+    --commit-user)
+      COMMIT_USER="${2}"
+      shift 2
+      ;;
+    --commit-email)
+      COMMIT_EMAIL="${2}"
+      shift 2
+      ;;
     --image-tag-location)
       IMAGE_TAG_LOCATION="${2}"
       DEFAULT_IMAGE_TAG_LOCATION=false
@@ -498,7 +518,7 @@ main() {
     git_checkout
   fi
   if [ "${EXTRACT_TAG}" == true ]; then
-    extract_git_commit
+    extract_git_information
   fi
 }
 
