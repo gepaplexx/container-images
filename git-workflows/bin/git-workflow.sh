@@ -171,8 +171,8 @@ update_version_multibranch() {
   log "update image tag: ${IMAGE_TAG_LOCATION} = ${COMMIT_HASH}"
   yq -i "${IMAGE_TAG_LOCATION} = env(COMMIT_HASH)" values.yaml
   yq -i "${IMAGE_TAG_LOCATION} style=\"double\"" values.yaml
-  git config --global user.name "argo-ci"
-  git config --global user.email "argo-ci@gepardec.com"
+  git config --global user.name "${COMMIT_USER}"
+  git config --global user.email "${COMMIT_EMAIL}"
   git add .
   git commit -m "updated image version to tag ${COMMIT_HASH}" 2>&1 | formatOutput
   git push 2>&1 | formatOutput
@@ -203,8 +203,8 @@ update_version_multidir() {
     yq -i "${IMAGE_TAG_LOCATION} style=\"double\"" values.yaml
   fi
 
-  git config --global user.name "argo-ci"
-  git config --global user.email "argo-ci@gepardec.com"
+  git config --global user.name "${COMMIT_USER}"
+  git config --global user.email "${COMMIT_EMAIL}"
   git add .
   git commit -m "updated image version to tag ${COMMIT_HASH}" 2>&1 | formatOutput
   git push 2>&1 | formatOutput
@@ -240,8 +240,8 @@ update_namespace() {
   log "--- UPDATE NAMESPACE ---"
   changedirOrExit "${WORKSPACE}/${REPO_NAME}"
   yq_update_application
-  git config --global user.name "argo-ci"
-  git config --global user.email "argo-ci@gepardec.com"
+  git config --global user.name "${COMMIT_USER}"
+  git config --global user.email "${COMMIT_EMAIL}"
   git add .
   git commit -m "created branch ${BRANCH} and updated application.yaml" 2>&1 | formatOutput
   git push --set-upstream origin "${BRANCH}" 2>&1 | formatOutput
@@ -254,8 +254,8 @@ update_namespace_multidir() {
   log "--- UPDATE NAMESPACE (multidir) ---"
   changedirOrExit "${WORKSPACE}/${REPO_NAME}"
   yq_update_application_multidir
-  git config --global user.name "argo-ci"
-  git config --global user.email "argo-ci@gepardec.com"
+  git config --global user.name "${COMMIT_USER}"
+  git config --global user.email "${COMMIT_EMAIL}"
   git add .
   git commit -m "new folder '${NAMESPACE}' in apps/env, updated argocd/applicationset.yaml" 2>&1 | formatOutput
   git push 2>&1 | formatOutput
@@ -275,8 +275,8 @@ delete_branch() {
   cp "${WORKSPACE}/${REPO_NAME}/application.yaml" "${WORKSPACE}/application.yaml"
   git checkout main 2>&1 | formatOutput
   git branch -D ${BRANCH} 2>&1 | formatOutput
-  git config --global user.name "argo-ci"
-  git config --global user.email "argo-ci@gepardec.com"
+  git config --global user.name "${COMMIT_USER}"
+  git config --global user.email "${COMMIT_EMAIL}"
   git push origin :${BRANCH} 2>&1 | formatOutput
 }
 
@@ -292,8 +292,8 @@ delete_branch_multidir() {
   log "deleting directory ${NAMESPACE} from apps/env"
   rm -rf "apps/env/${NAMESPACE}"
 
-  git config --global user.name "argo-ci"
-  git config --global user.email "argo-ci@gepardec.com"
+  git config --global user.name "${COMMIT_USER}"
+  git config --global user.email "${COMMIT_EMAIL}"
   git add .
   git commit -m "removed folder '${NAMESPACE}' from apps/env, updated argocd/applicationset.yaml" 2>&1 | formatOutput
   git push 2>&1 | formatOutput
