@@ -30,6 +30,7 @@ DEFAULT_IMAGE_TAG_LOCATION=true
 DEPLOY_FROM_BRANCH=""
 DEPLOY_TO_BRANCH=""
 DEPLOY_MULTIDIR=false
+HELP=false
 ######################### print usage #################
 
 print_usage(){
@@ -116,9 +117,9 @@ git_clone() {
 }
 
 git_checkout() {
-  set +e
   log "--- GIT CHECKOUT ---"
   changedirOrExit "${WORKSPACE}/${REPO_NAME}"
+  set +e
   git remote set-branches origin '*' | formatOutput
   git fetch | formatOutput
   log "checkout branch '${BRANCH}'"
@@ -344,7 +345,7 @@ deploy_from_to_multibranch(){
 ######################   handle options ###################
 
 handle_options() {
-local opts=$(getopt -o cu:b:p:n:t: -l argo-update,argo-update-multidir,clone,url:,branch:,path:,name:,extract,tag:,argo-create,argo-create-multidir,namespace:,argo-delete,argo-delete-multidir,image-tag-location:,from-branch:,to-branch:,deploy-multidir,commit-user:,commit-email -- "$@")
+local opts=$(getopt -o chu:b:p:n:t: -l argo-update,argo-update-multidir,clone,url:,branch:,path:,name:,extract,tag:,argo-create,argo-create-multidir,namespace:,argo-delete,argo-delete-multidir,image-tag-location:,from-branch:,to-branch:,deploy-multidir,commit-user:,commit-email,help -- "$@")
 local opts_return=$?
 
 if [[ ${opts_return} != 0 ]]; then
@@ -439,6 +440,10 @@ while true ; do
       DEPLOY_MULTIDIR=true
       shift 1
       ;;
+    --help | -h)
+      HELP=true
+      shift 1
+      ;;
     *)
       break
       ;;
@@ -452,6 +457,11 @@ done
 main() {
   log "$*"
   handle_options "$@"
+
+  if [ "${HELP}" == true ]; then
+    print_usage
+    exit 0
+  fi
 
   if [ "${DEPLOY_MULTIDIR}" == true ] && [ -n "${DEPLOY_FROM_BRANCH}" ] && [ -n "${DEPLOY_TO_BRANCH}" ]; then
     update_deploy_branches
