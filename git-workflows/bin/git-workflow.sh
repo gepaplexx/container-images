@@ -241,7 +241,7 @@ update_namespace() {
   changedirOrExit "${WORKSPACE}/${REPO_NAME}"
   yq_update_application
   git config --global user.name "${COMMIT_USER}"
-  git config --global user.email "${COMMIT_EMAIL}"
+  git config --global user.email "argo-ci@gepardec.com"
   git add .
   git commit -m "created branch ${BRANCH} and updated application.yaml" 2>&1 | formatOutput
   git push --set-upstream origin "${BRANCH}" 2>&1 | formatOutput
@@ -255,7 +255,7 @@ update_namespace_multidir() {
   changedirOrExit "${WORKSPACE}/${REPO_NAME}"
   yq_update_application_multidir
   git config --global user.name "${COMMIT_USER}"
-  git config --global user.email "${COMMIT_EMAIL}"
+  git config --global user.email "argo-ci@gepardec.com"
   git add .
   git commit -m "new folder '${NAMESPACE}' in apps/env, updated argocd/applicationset.yaml" 2>&1 | formatOutput
   git push 2>&1 | formatOutput
@@ -276,7 +276,7 @@ delete_branch() {
   git checkout main 2>&1 | formatOutput
   git branch -D ${BRANCH} 2>&1 | formatOutput
   git config --global user.name "${COMMIT_USER}"
-  git config --global user.email "${COMMIT_EMAIL}"
+  git config --global user.email "argo-ci@gepardec.com"
   git push origin :${BRANCH} 2>&1 | formatOutput
 }
 
@@ -293,7 +293,7 @@ delete_branch_multidir() {
   rm -rf "apps/env/${NAMESPACE}"
 
   git config --global user.name "${COMMIT_USER}"
-  git config --global user.email "${COMMIT_EMAIL}"
+  git config --global user.email "argo-ci@gepardec.com"
   git add .
   git commit -m "removed folder '${NAMESPACE}' from apps/env, updated argocd/applicationset.yaml" 2>&1 | formatOutput
   git push 2>&1 | formatOutput
