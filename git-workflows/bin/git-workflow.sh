@@ -30,7 +30,6 @@ DEFAULT_IMAGE_TAG_LOCATION=true
 DEPLOY_FROM_BRANCH=""
 DEPLOY_TO_BRANCH=""
 DEPLOY_MULTIDIR=false
-HELP=false
 ######################### print usage #################
 
 print_usage(){
@@ -441,8 +440,8 @@ while true ; do
       shift 1
       ;;
     --help | -h)
-      HELP=true
-      shift 1
+      print_usage
+      exit 0
       ;;
     *)
       break
@@ -457,11 +456,6 @@ done
 main() {
   log "$*"
   handle_options "$@"
-
-  if [ "${HELP}" == true ]; then
-    print_usage
-    exit 0
-  fi
 
   if [ "${DEPLOY_MULTIDIR}" == true ] && [ -n "${DEPLOY_FROM_BRANCH}" ] && [ -n "${DEPLOY_TO_BRANCH}" ]; then
     update_deploy_branches
