@@ -500,7 +500,7 @@ main() {
     if [ $ERR -ne 0 ]; then
       # branch doesn't exist
       changedirOrExit "${WORKSPACE}/${REPO_NAME}"
-      yt_update_namespace
+      yq_update_application
     else
       # branch DOES exist
       delete_branch
