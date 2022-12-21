@@ -23,7 +23,7 @@ jobs:
           dockerfile: git-workflows/Containerfile
           directory:  git-workflows
           addLatest: true
-          tags: ${{ steps.source-version.outputs.version }}${{ github.ref_name }}
+          tags: ${{ steps.source-version.outputs.version }}-GPX-581
 #  build-maven:
 #    runs-on: ubuntu-latest
 #    steps:
