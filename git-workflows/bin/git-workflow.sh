@@ -495,6 +495,8 @@ main() {
     update_vars
     git_clone
     git_checkout
+    echo "gattma"
+    echo $ERR
     if [ $ERR -ne 0 ]; then
       # branch doesn't exist
       changedirOrExit "${WORKSPACE}/${REPO_NAME}"
