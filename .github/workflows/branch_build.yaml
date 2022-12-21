@@ -84,21 +84,21 @@ jobs:
 #          directory: argocd
 #          addLatest: true
 #          tags: ${{ steps.source-version.outputs.version }}-${{ github.ref_name }}
-  notify:
-    name: Slack Notifications
-    runs-on: ubuntu-latest
-    if: ${{ failure() }}
-    needs:
-      - build-git-workflows
-      - build-maven
-      - build-slack-notification
-#      - build-argocd
-    steps:
-      - name: Notify Slack channel on failure
-        uses: rtCamp/action-slack-notify@v2
-        env:
-          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
-          SLACK_ICON: https://avatars.githubusercontent.com/u/74975412?s=200&v=4
-          SLACK_USERNAME: ${{ github.repository }}
-          SLACK_COLOR: '#ff0033'
-          SLACK_FOOTER: ''
+#  notify:
+#    name: Slack Notifications
+#    runs-on: ubuntu-latest
+#    if: ${{ failure() }}
+#    needs:
+#      - build-git-workflows
+#      - build-maven
+#      - build-slack-notification
+##      - build-argocd
+#    steps:
+#      - name: Notify Slack channel on failure
+#        uses: rtCamp/action-slack-notify@v2
+#        env:
+#          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+#          SLACK_ICON: https://avatars.githubusercontent.com/u/74975412?s=200&v=4
+#          SLACK_USERNAME: ${{ github.repository }}
+#          SLACK_COLOR: '#ff0033'
+#          SLACK_FOOTER: ''
