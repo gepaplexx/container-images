@@ -495,12 +495,13 @@ main() {
     update_vars
     git_clone
     git_checkout
-    echo "gattma"
-    echo $ERR
     if [ $ERR -ne 0 ]; then
       # branch doesn't exist
       changedirOrExit "${WORKSPACE}/${REPO_NAME}"
       yq_update_application
+      echo "after yq"
+      cp "${WORKSPACE}/${REPO_NAME}/application.yaml" "${WORKSPACE}/application.yaml"
+      echo "after cp"
     else
       # branch DOES exist
       delete_branch
