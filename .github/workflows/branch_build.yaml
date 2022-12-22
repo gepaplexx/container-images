@@ -64,26 +64,26 @@ jobs:
           directory: slack-notifications
           addLatest: true
           tags: ${{ steps.source-version.outputs.version }}-${{ github.ref_name }}
-  build-argocd:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-        name: checkout
-      - name: source-version
-        id: source-version
-        run: |
-          echo "::set-output name=version::$(cat argocd/version)"
-      - uses: mr-smithers-excellent/docker-build-push@v5
-        name: push-container-image
-        with:
-          image: argocd
-          registry: ghcr.io
-          username: ${{ github.repository }}
-          password: ${{ secrets.GHCR_TOKEN }}
-          dockerfile: argocd/Containerfile
-          directory: argocd
-          addLatest: true
-          tags: ${{ steps.source-version.outputs.version }}-${{ github.ref_name }}
+#  build-argocd:
+#    runs-on: ubuntu-latest
+#    steps:
+#      - uses: actions/checkout@v2
+#        name: checkout
+#      - name: source-version
+#        id: source-version
+#        run: |
+#          echo "::set-output name=version::$(cat argocd/version)"
+#      - uses: mr-smithers-excellent/docker-build-push@v5
+#        name: push-container-image
+#        with:
+#          image: argocd
+#          registry: ghcr.io
+#          username: ${{ github.repository }}
+#          password: ${{ secrets.GHCR_TOKEN }}
+#          dockerfile: argocd/Containerfile
+#          directory: argocd
+#          addLatest: true
+#          tags: ${{ steps.source-version.outputs.version }}-${{ github.ref_name }}
   notify:
     name: Slack Notifications
     runs-on: ubuntu-latest
