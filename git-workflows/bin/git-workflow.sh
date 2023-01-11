@@ -495,7 +495,15 @@ main() {
     update_vars
     git_clone
     git_checkout
-    delete_branch
+    if [ $ERR -ne 0 ]; then
+      # branch doesn't exist
+      changedirOrExit "${WORKSPACE}/${REPO_NAME}"
+      yq_update_application
+      cp "${WORKSPACE}/${REPO_NAME}/application.yaml" "${WORKSPACE}/application.yaml"
+    else
+      # branch DOES exist
+      delete_branch
+    fi
     exit 0
   fi
   if [ "${DELETE_ARGO_MULTIDIR}" == true ]; then
