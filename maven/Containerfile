@@ -1,4 +1,4 @@
-FROM maven:3.8.4-jdk-11
+FROM maven:3.8.6-jdk-11
 
 COPY files/default-settings.xml /usr/share/maven/conf/settings.xml
 COPY bin/mvn-wrapper.sh /usr/bin/mvn-wrapper.sh
