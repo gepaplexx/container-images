@@ -31,6 +31,7 @@ DEPLOY_FROM_BRANCH=""
 DEPLOY_TO_BRANCH=""
 DEPLOY_MULTIDIR=false
 HELP=false
+declare -a STAGES=("main" "dev" "qa" "prod")
 ######################### print usage #################
 
 print_usage(){
@@ -55,9 +56,10 @@ Options:
     - | argo-create-multidir:   create a new argocd application in $namespace (multidir)
     - | argo-delete:            deletes the corresponding $branch in infrastructure repository (multibranch)
     - | argo-delete-multidir:   deletes the corresponding $branch in infrastructure repository (multidir)
-    - | from-branch:          source branch for deploying from one branch to another
-    - | to-branch:            target branch for deploying from one branch to another
-    - | deploy-multidir:   boolean flag to differentiate multibranch and multidir deployment
+    - | from-branch:            source branch for deploying from one branch to another
+    - | to-branch:              target branch for deploying from one branch to another
+    - | deploy-multidir:        boolean flag to differentiate multibranch and multidir deployment
+    - | stage-override:         allows to override the sequence of stages for deployment
 
     h | help: This help
 
@@ -102,8 +104,6 @@ checkoutOrExit() {
 
 ####################### checkout ##################
 
-# TODO: handle private repositories (https://stackoverflow.com/questions/2505096/clone-a-private-repository-github)
-
 git_clone() {
   log "--- GIT CLONE ---"
   if [ -z "${CLONE_URL}" ]; then
@@ -113,7 +113,6 @@ git_clone() {
   fi
   log "cloning '$CLONE_URL' into '${WORKSPACE}/${REPO_NAME}"
   git clone --depth 1 --recurse-submodules --shallow-submodules "${CLONE_URL}" "${WORKSPACE}"/"${REPO_NAME}" 2>&1 | formatOutput
-
 }
 
 git_checkout() {
@@ -329,17 +328,49 @@ deploy_from_to() {
 }
 
 deploy_from_to_multibranch(){
-  log "--- DEPLOY VERSION FROM $DEPLOY_FROM_BRANCH to $DEPLOY_TO_BRANCH multibranch-style---"
-  #TODO handle feature-branches
+  FROM_INDEX=""
+  TO_INDEX=""
+
   changedirOrExit "${WORKSPACE}/${REPO_NAME}"
   git remote set-branches origin '*'
   git fetch --unshallow
-  checkoutOrExit "${DEPLOY_FROM_BRANCH}"
-  checkoutOrExit "${DEPLOY_TO_BRANCH}"
+
+  # get index of FROM_BRANCH and TO_BRANCH in STAGES
+  for i in "${!STAGES[@]}"; do
+    if [[ "${STAGES[$i]}" == "${DEPLOY_FROM_BRANCH}" ]]; then
+      FROM_INDEX=$i
+    fi
+    if [[ "${STAGES[$i]}" == "${DEPLOY_TO_BRANCH}" ]]; then
+      TO_INDEX=$i
+    fi
+  done
+
+  # sanity checks
+  if [ -z "${FROM_INDEX}" ] || [ -z "${TO_INDEX}" ]; then
+    echo "Source or target stage not defined. exiting"
+    exit 1
+  fi
+
+  if [[ "${FROM_INDEX}" -gt "${TO_INDEX}" ]]; then
+    echo "Configuration doesn't allow merge from ${DEPLOY_FROM_BRANCH} to ${DEPLOY_TO_BRANCH}. exiting"
+    exit 1
+  fi
+
+  # git configuration
   git config --global user.name "argo-ci"
   git config --global user.email "argo-ci@gepardec.com"
-  git merge "${DEPLOY_FROM_BRANCH}"
-  git push 2>&1 | formatOutput
+  checkoutOrExit ${DEPLOY_FROM_BRANCH}
+
+  while [[ $FROM_INDEX -lt $TO_INDEX ]]; do
+    FROM_BRANCH=${STAGES[$FROM_INDEX]}
+    TO_BRANCH=${STAGES[$((FROM_INDEX + 1))]}
+
+    echo "Deploying from ${FROM_BRANCH} to ${TO_BRANCH}"
+    checkoutOrExit ${TO_BRANCH}
+    git merge ${FROM_BRANCH}
+    git push 2>&1 | formatOutput
+    FROM_INDEX=$((FROM_INDEX + 1))
+  done
 }
 
 ######################   handle options ###################
