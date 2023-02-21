@@ -1,6 +1,6 @@
 #!/bin/sh
 
-SETTINGS_LOCATION=/root/.m2/maven-settings.xml
+SETTINGS_LOCATION=/root/.m2/settings.xml
 SETTINGS_STRING=""
 
 
