@@ -10,7 +10,7 @@ jobs:
       matrix:
         version:
           - 3.8.6-openjdk-11
-          - 3.8.6-openjdk-17
+          - 3.8.6-openjdk-18
           - 3.8.6-openjdk-8
     steps:
       - uses: actions/checkout@v3
