@@ -25,7 +25,7 @@ jobs:
           dockerfile: maven/Containerfile
           directory: maven
           buildArgs: VERSION=${{ matrix.version }}
-          tags: ${{ matrix.version }}-${{ github.ref_name }}
+          tags: ${{ matrix.version }}-$(git rev-parse --short HEAD)
   build-newman:
     runs-on: ubuntu-latest
     steps:
@@ -44,7 +44,7 @@ jobs:
           dockerfile: newman/Containerfile
           directory: newman
           addLatest: true
-          tags: ${{ steps.source-version.outputs.version }},latest
+          tags: ${{ steps.source-version.outputs.version }}-$(git rev-parse --short HEAD),latest
   notify:
     name: Slack Notifications
     runs-on: ubuntu-latest
