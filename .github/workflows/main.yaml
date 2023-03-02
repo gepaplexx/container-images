@@ -7,35 +7,17 @@ on:
   workflow_dispatch:
 
 jobs:
-  build-git-workflows:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-        name: checkout
-      - name: source-version
-        id: source-version
-        run: |
-          echo "::set-output name=version::$(cat git-workflows/version)"
-      - uses: mr-smithers-excellent/docker-build-push@v5
-        name: push-container-image
-        with:
-          image: git-workflows
-          registry: ghcr.io
-          username: ${{ github.repository }}
-          password: ${{ secrets.GHCR_TOKEN }}
-          dockerfile: git-workflows/Containerfile
-          directory:  git-workflows
-          addLatest: true
-          tags: ${{ steps.source-version.outputs.version }},latest
   build-maven:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        version:
+          - 3.8.6-openjdk-11
+          - 3.8.6-openjdk-17
+          - 3.8.6-openjdk-8
     steps:
       - uses: actions/checkout@v3
         name: checkout
-      - name: source-version
-        id: source-version
-        run: |
-          echo "::set-output name=version::$(cat maven/version)"
       - uses: mr-smithers-excellent/docker-build-push@v5
         name: push-container-image
         with:
@@ -45,48 +27,9 @@ jobs:
           password: ${{ secrets.GHCR_TOKEN }}
           dockerfile: maven/Containerfile
           directory: maven
+          buildArgs: VERSION=${{ matrix.version }}
           addLatest: true
-          tags: ${{ steps.source-version.outputs.version }},latest
-  build-slack-notification:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-        name: checkout
-      - name: source-version
-        id: source-version
-        run: |
-          echo "::set-output name=version::$(cat slack-notifications/version)"
-      - uses: mr-smithers-excellent/docker-build-push@v5
-        name: push-container-image
-        with:
-          image: slack-notification
-          registry: ghcr.io
-          username: ${{ github.repository }}
-          password: ${{ secrets.GHCR_TOKEN }}
-          dockerfile: slack-notifications/Containerfile
-          directory: slack-notifications
-          addLatest: true
-          tags: ${{ steps.source-version.outputs.version }},latest
-#  build-argocd:
-#    runs-on: ubuntu-latest
-#    steps:
-#      - uses: actions/checkout@v2
-#        name: checkout
-#      - name: source-version
-#        id: source-version
-#        run: |
-#          echo "::set-output name=version::$(cat argocd/version)"
-#      - uses: mr-smithers-excellent/docker-build-push@v5
-#        name: push-container-image
-#        with:
-#          image: argocd
-#          registry: ghcr.io
-#          username: ${{ github.repository }}
-#          password: ${{ secrets.GHCR_TOKEN }}
-#          dockerfile: argocd/Containerfile
-#          directory: argocd
-#          addLatest: true
-#          tags: ${{ steps.source-version.outputs.version }},latest
+          tags: ${{ matrix.version }},latest
   build-newman:
     runs-on: ubuntu-latest
     steps:
@@ -94,8 +37,7 @@ jobs:
         name: checkout
       - name: source-version
         id: source-version
-        run: |
-          echo "::set-output name=version::$(cat newman/version)"
+        run: echo "version=$(cat newman/version)" >> $GITHUB_OUTPUT
       - uses: mr-smithers-excellent/docker-build-push@v5
         name: push-container-image
         with:
@@ -112,10 +54,7 @@ jobs:
     runs-on: ubuntu-latest
     if: ${{ failure() }}
     needs:
-      - build-git-workflows
       - build-maven
-      - build-slack-notification
-#      - build-argocd
       - build-newman
     steps:
       - name: Notify Slack channel on failure
