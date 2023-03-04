@@ -16,7 +16,7 @@ jobs:
         id: source-version
         run: |
           echo "::set-output name=version::$(cat git-workflows/version)"
-      - uses: mr-smithers-excellent/docker-build-push@v5
+      - uses: mr-smithers-excellent/docker-build-push@v6
         name: push-container-image
         with:
           image: git-workflows
@@ -36,7 +36,7 @@ jobs:
         id: source-version
         run: |
           echo "::set-output name=version::$(cat maven/version)"
-      - uses: mr-smithers-excellent/docker-build-push@v5
+      - uses: mr-smithers-excellent/docker-build-push@v6
         name: push-container-image
         with:
           image: maven
@@ -56,7 +56,7 @@ jobs:
         id: source-version
         run: |
           echo "::set-output name=version::$(cat slack-notifications/version)"
-      - uses: mr-smithers-excellent/docker-build-push@v5
+      - uses: mr-smithers-excellent/docker-build-push@v6
         name: push-container-image
         with:
           image: slack-notification
@@ -96,7 +96,7 @@ jobs:
         id: source-version
         run: |
           echo "::set-output name=version::$(cat newman/version)"
-      - uses: mr-smithers-excellent/docker-build-push@v5
+      - uses: mr-smithers-excellent/docker-build-push@v6
         name: push-container-image
         with:
           image: newman
