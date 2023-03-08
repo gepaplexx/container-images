@@ -15,7 +15,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
         name: checkout
-      - uses: mr-smithers-excellent/docker-build-push@v5
+      - uses: mr-smithers-excellent/docker-build-push@v6
         name: push-container-image
         with:
           image: maven
@@ -34,7 +34,7 @@ jobs:
       - name: source-version
         id: source-version
         run: echo "version=$(cat newman/version)" >> $GITHUB_OUTPUT
-      - uses: mr-smithers-excellent/docker-build-push@v5
+      - uses: mr-smithers-excellent/docker-build-push@v6
         name: push-container-image
         with:
           image: newman
