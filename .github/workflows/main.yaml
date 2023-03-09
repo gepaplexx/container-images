@@ -49,7 +49,7 @@ jobs:
           password: ${{ secrets.GHCR_TOKEN }}
           dockerfile: kubectl-oc/Containerfile
           directory: kubectl-oc
-          buildArgs: OC_VERSION=${{ matrix.version }}
+          buildArgs: VERSION=${{ matrix.version }}
           addLatest: true
           tags: ${{ matrix.version }},latest
   build-newman:
