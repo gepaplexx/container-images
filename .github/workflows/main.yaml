@@ -35,7 +35,6 @@ jobs:
     strategy:
       matrix:
         version:
-          - v4.10
           - v4.11
           - v4.12
     steps:
