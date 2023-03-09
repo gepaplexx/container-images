@@ -30,28 +30,6 @@ jobs:
           buildArgs: VERSION=${{ matrix.version }}
           addLatest: true
           tags: ${{ matrix.version }},latest
-  build-kubectl-oc:
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        version:
-          - 4.11
-          - 4.12
-    steps:
-      - uses: actions/checkout@v3
-        name: checkout
-      - uses: mr-smithers-excellent/docker-build-push@v6
-        name: push-container-image
-        with:
-          image: kubectl-oc
-          registry: ghcr.io
-          username: ${{ github.repository }}
-          password: ${{ secrets.GHCR_TOKEN }}
-          dockerfile: kubectl-oc/Containerfile
-          directory: kubectl-oc
-          buildArgs: VERSION=${{ matrix.version }}
-          addLatest: true
-          tags: ${{ matrix.version }},latest
   build-newman:
     runs-on: ubuntu-latest
     steps:
@@ -78,7 +56,6 @@ jobs:
     needs:
       - build-maven
       - build-newman
-      - build-kubectl-oc
     steps:
       - name: Notify Slack channel on failure
         uses: rtCamp/action-slack-notify@v2
