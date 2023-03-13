@@ -12,6 +12,8 @@ RUN apt update -y && apt install -y wget vim bash \
 
 COPY version /etc/version
 
+USER kubectl
+
 ENTRYPOINT ["bash"]
 
 

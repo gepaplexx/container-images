@@ -4,4 +4,6 @@ RUN npm install -g newman-reporter-htmlextra && \
     npm install -g newman-reporter-json && \
     npm install -g newman-reporter-html
 
+USER newman
+
 COPY version /etc/version
