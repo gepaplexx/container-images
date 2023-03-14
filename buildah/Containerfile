@@ -1,0 +1,24 @@
+ARG VERSION=latest
+
+FROM quay.io/buildah/stable:$VERSION
+
+RUN touch /etc/subgid /etc/subuid \
+ && chmod g=u /etc/subgid /etc/subuid /etc/passwd \
+ && echo build:10000:65536 > /etc/subuid \
+ && echo build:10000:65536 > /etc/subgid
+
+# Use chroot since the default runc does not work when running rootless
+RUN echo "export BUILDAH_ISOLATION=chroot" >> /home/build/.bashrc
+
+# Use VFS since fuse does not work
+RUN mkdir -p /home/build/.config/containers \
+ && (echo '[storage]';echo 'driver = "vfs"') > /home/build/.config/containers/storage.conf
+
+# Allow permissive mode for short names because inside of  the container there's no TTY terminal and the build would fail
+RUN sed -i 's/short-name-mode="enforcing"/short-name-mode="permissive"/' /etc/containers/registries.conf
+
+USER build
+WORKDIR /home/build
+
+# Just keep the container running, allowing "oc rsh" access
+CMD ["sleep", "infinity"]

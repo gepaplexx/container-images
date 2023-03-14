@@ -26,6 +26,27 @@ jobs:
           directory: maven
           buildArgs: VERSION=${{ matrix.version }}
           tags: ${{ matrix.version }}-$(git rev-parse --short HEAD)
+  build-buildah:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        version:
+          - v1.29
+    steps:
+      - uses: actions/checkout@v3
+        name: checkout
+      - uses: mr-smithers-excellent/docker-build-push@v6
+        name: push-container-image
+        with:
+          image: buildah
+          registry: ghcr.io
+          username: ${{ github.repository }}
+          password: ${{ secrets.GHCR_TOKEN }}
+          dockerfile: buildah/Containerfile
+          directory: buildah
+          buildArgs: VERSION=${{ matrix.version }}
+          addLatest: true
+          tags: ${{ matrix.version }}-$(git rev-parse --short HEAD),latest
   build-newman:
     runs-on: ubuntu-latest
     steps:
