@@ -4,11 +4,10 @@ FROM quay.io/buildah/stable:$VERSION
 
 RUN touch /etc/subgid /etc/subuid \
  && chmod g=u /etc/subgid /etc/subuid /etc/passwd \
+ && chmod u-s /usr/bin/newuidmap /usr/bin/newgidmap \
  && echo build:10000:65536 > /etc/subuid \
  && echo build:10000:65536 > /etc/subgid
 
-# Use chroot since the default runc does not work when running rootless
-RUN echo "export BUILDAH_ISOLATION=chroot" >> /home/build/.bashrc
 
 # Use VFS since fuse does not work
 RUN mkdir -p /home/build/.config/containers \
@@ -17,7 +16,7 @@ RUN mkdir -p /home/build/.config/containers \
 # Allow permissive mode for short names because inside of  the container there's no TTY terminal and the build would fail
 RUN sed -i 's/short-name-mode="enforcing"/short-name-mode="permissive"/' /etc/containers/registries.conf
 
-USER build
+USER 1000
 WORKDIR /home/build
 
 # Just keep the container running, allowing "oc rsh" access
