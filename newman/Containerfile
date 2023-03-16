@@ -4,8 +4,8 @@ RUN npm install -g newman-reporter-htmlextra && \
     npm install -g newman-reporter-json && \
     npm install -g newman-reporter-html \
 
-RUN addgroup -g 1000 -S newman && \
-    adduser -u 1000 -S newman -G newman
+RUN addgroup --gid 1000 --system newman && \
+    adduser newman --uid 1000 --ingroup newman
 
 USER 1000
 

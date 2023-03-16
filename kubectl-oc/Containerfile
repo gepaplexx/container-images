@@ -10,8 +10,8 @@ RUN apt update -y && apt install -y wget vim bash \
     && chmod -R +x  /usr/bin/ \
     && chgrp -R 0 /usr/bin/
 
-RUN addgroup -g 1000 -S kubectl && \
-    adduser -u 1000 -S kubectl -G kubectl
+RUN addgroup --gid 1000 --system kubectl && \
+    adduser kubectl --uid 1000 --ingroup kubectl
 
 COPY version /etc/version
 
