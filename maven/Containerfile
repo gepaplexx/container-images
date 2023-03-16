@@ -11,6 +11,9 @@ RUN chmod +x /usr/bin/mvn-wrapper.sh && \
     chgrp -R 0 /root && \
         chmod -R g=u /root
 
-USER maven
+RUN addgroup -g 1000 -S maven && \
+    adduser -u 1000 -S maven -G maven
+
+USER 1000
 
 COPY version /etc/version

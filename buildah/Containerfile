@@ -5,8 +5,8 @@ FROM quay.io/buildah/stable:$VERSION
 RUN touch /etc/subgid /etc/subuid \
  && chmod g=u /etc/subgid /etc/subuid /etc/passwd \
  && chmod u-s /usr/bin/newuidmap /usr/bin/newgidmap \
- && echo build:10000:65536 > /etc/subuid \
- && echo build:10000:65536 > /etc/subgid
+ && printf "build:1:999\nbuild:1001:2000" > /etc/subuid \
+ && printf "build:1:999\nbuild:1001:2000" > /etc/subgid
 
 
 # Use VFS since fuse does not work
