@@ -2,10 +2,7 @@ FROM postman/newman
 
 RUN npm install -g newman-reporter-htmlextra && \
     npm install -g newman-reporter-json && \
-    npm install -g newman-reporter-html \
-
-RUN addgroup --gid 1000 --system newman && \
-    adduser newman --uid 1000 --ingroup newman
+    npm install -g newman-reporter-html
 
 USER 1000
 
