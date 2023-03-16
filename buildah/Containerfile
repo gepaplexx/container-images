@@ -1,0 +1,23 @@
+ARG VERSION=latest
+
+FROM quay.io/buildah/stable:$VERSION
+
+RUN touch /etc/subgid /etc/subuid \
+ && chmod g=u /etc/subgid /etc/subuid /etc/passwd \
+ && chmod u-s /usr/bin/newuidmap /usr/bin/newgidmap \
+ && printf "build:1:999\nbuild:1001:2000" > /etc/subuid \
+ && printf "build:1:999\nbuild:1001:2000" > /etc/subgid
+
+
+# Use VFS since fuse does not work
+RUN mkdir -p /home/build/.config/containers \
+ && (echo '[storage]';echo 'driver = "vfs"') > /home/build/.config/containers/storage.conf
+
+# Allow permissive mode for short names because inside of  the container there's no TTY terminal and the build would fail
+RUN sed -i 's/short-name-mode="enforcing"/short-name-mode="permissive"/' /etc/containers/registries.conf
+
+USER 1000
+WORKDIR /home/build
+
+# Just keep the container running, allowing "oc rsh" access
+CMD ["sleep", "infinity"]
