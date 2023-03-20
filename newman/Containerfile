@@ -1,8 +1,11 @@
 FROM postman/newman
 
-RUN npm install -g newman-reporter-htmlextra && \
-    npm install -g newman-reporter-json && \
-    npm install -g newman-reporter-html
+RUN npm install -g newman-reporter-htmlextra \
+    && npm install -g newman-reporter-json \
+    && npm install -g newman-reporter-html \
+    && chown -R 1000:0 /etc/newman \
+    && chmod -R g=u /etc/newman
+
 
 USER 1000
 
