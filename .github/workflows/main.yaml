@@ -14,6 +14,7 @@ jobs:
         version:
           - 3.8.6-openjdk-11
           - 3.6.3-openjdk-11
+          - 3.8.2-openjdk-11
           - 3.8.6-openjdk-18
           - 3.8.6-openjdk-8
     steps:
