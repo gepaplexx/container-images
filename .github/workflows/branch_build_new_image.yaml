@@ -1,0 +1,24 @@
+name: Branch Build New Image
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build-debug-container:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        name: checkout
+      - name: source-version
+        id: source-version
+        run: echo "version=$(cat debug-container/version)" >> $GITHUB_OUTPUT
+      - uses: mr-smithers-excellent/docker-build-push@v6
+        name: push-container-image
+        with:
+          image: debug-container
+          registry: ghcr.io
+          username: ${{ github.repository }}
+          password: ${{ secrets.GHCR_TOKEN }}
+          dockerfile: debug-container/Containerfile
+          directory: debug-container
+          tags: ${{ steps.source-version.outputs.version }}-$(git rev-parse --short HEAD)
