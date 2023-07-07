@@ -31,7 +31,7 @@ jobs:
           directory: maven
           buildArgs: VERSION=${{ matrix.version }}
           addLatest: true
-          tags: ${{ matrix.version }},latest
+          tags: ${{ matrix.version }}
   build-buildah:
     runs-on: ubuntu-latest
     strategy:
@@ -52,7 +52,7 @@ jobs:
           directory: buildah
           buildArgs: VERSION=${{ matrix.version }}
           addLatest: true
-          tags: ${{ matrix.version }},latest
+          tags: ${{ matrix.version }}
   build-kubectl-oc:
     runs-on: ubuntu-latest
     strategy:
@@ -74,7 +74,7 @@ jobs:
           dockerfile: kubectl-oc/Containerfile
           directory: kubectl-oc
           addLatest: true
-          tags: ${{ matrix.version }},latest
+          tags: ${{ matrix.version }}
           buildArgs: OC_VERSION=${{ matrix.version }}
   build-newman:
     runs-on: ubuntu-latest
@@ -94,7 +94,7 @@ jobs:
           dockerfile: newman/Containerfile
           directory: newman
           addLatest: true
-          tags: ${{ steps.source-version.outputs.version }},latest
+          tags: ${{ steps.source-version.outputs.version }}
   notify:
     name: Slack Notifications
     runs-on: ubuntu-latest

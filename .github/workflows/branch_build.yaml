@@ -10,6 +10,8 @@ jobs:
       matrix:
         version:
           - 3.8.6-openjdk-11
+          - 3.6.3-openjdk-11
+          - 3.8.2-openjdk-11
           - 3.8.6-openjdk-18
           - 3.8.6-openjdk-8
     steps:
@@ -45,8 +47,29 @@ jobs:
           dockerfile: buildah/Containerfile
           directory: buildah
           buildArgs: VERSION=${{ matrix.version }}
-          addLatest: true
-          tags: ${{ matrix.version }}-$(git rev-parse --short HEAD),latest
+          tags: ${{ matrix.version }}-$(git rev-parse --short HEAD)
+  build-kubectl-oc:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        version:
+          - 4.10
+          - 4.11
+          - 4.12
+    steps:
+      - uses: actions/checkout@v3
+        name: checkout
+      - uses: mr-smithers-excellent/docker-build-push@v6
+        name: build-openshift-latest
+        with:
+          image: kubectl-oc
+          registry: ghcr.io
+          username: ${{ github.repository }}
+          password: ${{ secrets.GHCR_TOKEN }}
+          dockerfile: kubectl-oc/Containerfile
+          directory: kubectl-oc
+          tags: ${{ matrix.version }}-$(git rev-parse --short HEAD)
+          buildArgs: OC_VERSION=${{ matrix.version }}
   build-newman:
     runs-on: ubuntu-latest
     steps:
@@ -64,8 +87,26 @@ jobs:
           password: ${{ secrets.GHCR_TOKEN }}
           dockerfile: newman/Containerfile
           directory: newman
+          tags: ${{ steps.source-version.outputs.version }}-$(git rev-parse --short HEAD)
+  build-debug-container:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        name: checkout
+      - name: source-version
+        id: source-version
+        run: echo "version=$(cat debug-container/version)" >> $GITHUB_OUTPUT
+      - uses: mr-smithers-excellent/docker-build-push@v6
+        name: push-container-image
+        with:
+          image: debug-container
+          registry: ghcr.io
+          username: ${{ github.repository }}
+          password: ${{ secrets.GHCR_TOKEN }}
+          dockerfile: debug-container/Containerfile
+          directory: debug-container
           addLatest: true
-          tags: ${{ steps.source-version.outputs.version }}-$(git rev-parse --short HEAD),latest
+          tags: ${{ steps.source-version.outputs.version }}
   notify:
     name: Slack Notifications
     runs-on: ubuntu-latest
@@ -73,6 +114,8 @@ jobs:
     needs:
       - build-maven
       - build-newman
+      - build-kubectl-oc
+      - build-buildah
     steps:
       - name: Notify Slack channel on failure
         uses: rtCamp/action-slack-notify@v2
