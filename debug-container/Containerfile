@@ -1,0 +1,12 @@
+FROM ubuntu:jammy
+
+RUN apt update -y && apt install -y wget vim bash curl telnet netcat
+
+RUN addgroup --gid 1000 --system kubertl && \
+    adduser kubertl --uid 1000 --ingroup kubertl
+
+COPY version /etc/version
+
+USER 1000
+
+CMD ["sleep", "infinity"]
