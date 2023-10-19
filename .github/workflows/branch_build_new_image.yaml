@@ -7,7 +7,7 @@ jobs:
   build-debug-container:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         name: checkout
       - name: source-version
         id: source-version
