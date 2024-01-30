@@ -1,0 +1,15 @@
+ARG VERSION=latest
+
+FROM gradle:$VERSION
+
+COPY bin/gradle-wrapper.sh /usr/bin/gradle-wrapper.sh
+
+RUN chmod +x /usr/bin/gradle-wrapper.sh && \
+    chgrp  0 /usr/bin/gradle-wrapper.sh && \
+        chmod g=u /usr/bin/gradle-wrapper.sh && \
+    chgrp -R 0 /root && \
+        chmod -R g=u /root
+
+USER 1000
+
+COPY version /etc/version
