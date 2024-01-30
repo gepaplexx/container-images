@@ -33,6 +33,27 @@ jobs:
           buildArgs: VERSION=${{ matrix.version }}
           addLatest: true
           tags: ${{ matrix.version }}
+  build-gradle:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        version:
+          - 8.5-jdk11-alpine
+    steps:
+      - uses: actions/checkout@v4
+        name: checkout
+      - uses: mr-smithers-excellent/docker-build-push@v6
+        name: push-container-image
+        with:
+          image: gradle
+          registry: ghcr.io
+          username: ${{ github.repository }}
+          password: ${{ secrets.GHCR_TOKEN }}
+          dockerfile: gradle/Containerfile
+          directory: gradle
+          buildArgs: VERSION=${{ matrix.version }}
+          addLatest: true
+          tags: ${{ matrix.version }}
   build-buildah:
     runs-on: ubuntu-latest
     strategy:
@@ -106,6 +127,7 @@ jobs:
       - build-newman
       - build-kubectl-oc
       - build-buildah
+      - build-gradle
     steps:
       - name: Notify Slack channel on failure
         uses: rtCamp/action-slack-notify@v2
