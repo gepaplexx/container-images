@@ -19,7 +19,7 @@ jobs:
           - 3.8.6-openjdk-8
           - 3.8.6-amazoncorretto-17
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         name: checkout
       - uses: mr-smithers-excellent/docker-build-push@v6
         name: push-container-image
@@ -40,7 +40,7 @@ jobs:
         version:
           - 8.5-jdk11-alpine
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         name: checkout
       - uses: mr-smithers-excellent/docker-build-push@v6
         name: push-container-image
@@ -61,7 +61,7 @@ jobs:
         version:
           - v1.29
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         name: checkout
       - uses: mr-smithers-excellent/docker-build-push@v6
         name: push-container-image
@@ -85,7 +85,7 @@ jobs:
           - 4.12
           - 4.13
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         name: checkout
       - uses: mr-smithers-excellent/docker-build-push@v6
         name: build-openshift-latest
@@ -102,7 +102,7 @@ jobs:
   build-newman:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         name: checkout
       - name: source-version
         id: source-version
