@@ -18,7 +18,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         name: checkout
-      - uses: mr-smithers-excellent/docker-build-push@v6
+      - uses: mr-smithers-excellent/docker-build-push@v7
         name: push-container-image
         with:
           image: maven
@@ -38,7 +38,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         name: checkout
-      - uses: mr-smithers-excellent/docker-build-push@v6
+      - uses: mr-smithers-excellent/docker-build-push@v7
         name: push-container-image
         with:
           image: buildah
@@ -61,7 +61,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         name: checkout
-      - uses: mr-smithers-excellent/docker-build-push@v6
+      - uses: mr-smithers-excellent/docker-build-push@v7
         name: build-openshift-latest
         with:
           image: kubectl-oc
@@ -80,7 +80,7 @@ jobs:
       - name: source-version
         id: source-version
         run: echo "version=$(cat newman/version)" >> $GITHUB_OUTPUT
-      - uses: mr-smithers-excellent/docker-build-push@v6
+      - uses: mr-smithers-excellent/docker-build-push@v7
         name: push-container-image
         with:
           image: newman
@@ -98,7 +98,7 @@ jobs:
       - name: source-version
         id: source-version
         run: echo "version=$(cat debug-container/version)" >> $GITHUB_OUTPUT
-      - uses: mr-smithers-excellent/docker-build-push@v6
+      - uses: mr-smithers-excellent/docker-build-push@v7
         name: push-container-image
         with:
           image: debug-container

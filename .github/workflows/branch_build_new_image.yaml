@@ -12,7 +12,7 @@ jobs:
       - name: source-version
         id: source-version
         run: echo "version=$(cat debug-container/version)" >> $GITHUB_OUTPUT
-      - uses: mr-smithers-excellent/docker-build-push@v6
+      - uses: mr-smithers-excellent/docker-build-push@v7
         name: push-container-image
         with:
           image: debug-container
